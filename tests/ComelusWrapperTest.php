@@ -151,6 +151,25 @@ class ComelusWrapperTest extends TestCase
     }
 
 
+    public function testCheckMissingApiKey()
+    {
+
+        $client = $this->createMock(ClientInterface::class);
+        $requestFactory = $this->mockRequestFactory();
+        $streamFactory = $this->createMock(StreamFactoryInterface::class);
+
+        $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
+        $comelusWrapper->setUrl("https://comelus.fr");
+
+        $this->expectException(ComelusException::class);
+        $this->expectExceptionMessage("url and apiKey must be set");
+        $this->expectExceptionCode(400);
+
+        $comelusWrapper->check();
+
+    }
+
+
     public function testGetMailingLists()
     {
         $jsonResponse = '[{"id":"dc85a85e-0cfe-47f0-9019-ab104b04a6eb", "name":"myMailingList"}]';
@@ -268,6 +287,22 @@ class ComelusWrapperTest extends TestCase
 
         $this->assertSame($expected, $content);
 
+    }
+
+    public function testCreateDocumentMisingFields() {
+        $client = $this->createMock(ClientInterface::class);
+        $requestFactory = $this->mockRequestFactory();
+        $streamFactory = $this->createMock(StreamFactoryInterface::class);
+
+        $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
+        $comelusWrapper->setUrl("https://comelus.fr");
+        $comelusWrapper->setApiKey("MyApiKey");
+
+        $this->expectException(ComelusException::class);
+        $this->expectExceptionMessage('name, mailingListId, $files, desriptions cannot be empty');
+        $this->expectExceptionCode(400);
+
+        $comelusWrapper->createDocument('name', 'uuid', 'description', []);
     }
 
 
