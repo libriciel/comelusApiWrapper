@@ -1,4 +1,4 @@
-# lsMessageWrapper
+# ComelusApiWrapper
 
 Wrapper php de l'api de comelus.
 
