@@ -1,0 +1,12 @@
+<phpunit backupGlobals="false">
+    <testsuites>
+        <testsuite name="ComelusWrapper">
+            <directory>tests/</directory>
+        </testsuite>
+    </testsuites>
+    <filter>
+        <whitelist>
+            <directory suffix=".php">src</directory>
+        </whitelist>
+    </filter>
+</phpunit>

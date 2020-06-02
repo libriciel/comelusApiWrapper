@@ -1,8 +1,7 @@
 <?php
 
 
-namespace Libriciel\LsMessageWrapper;
-
+namespace Libriciel\ComelusApiWrapper;
 
 use Exception;
 

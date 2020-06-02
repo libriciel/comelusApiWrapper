@@ -1,7 +1,6 @@
 <?php
 
-namespace Libriciel\LsMessageWrapper;
-
+namespace Libriciel\ComelusApiWrapper;
 
 use Http\Message\MultipartStream\MultipartStreamBuilder;
 use Psr\Http\Client\ClientExceptionInterface;
@@ -37,7 +36,6 @@ class ComelusWrapper
 
     public function __construct(ClientInterface $client, RequestFactoryInterface $requestFactory, StreamFactoryInterface $streamFactory)
     {
-
         $this->client = $client;
         $this->requestFactory = $requestFactory;
         $this->streamFactory = $streamFactory;
@@ -136,6 +134,7 @@ class ComelusWrapper
 
         $builder = $this->prepareMultipart($name, $mailingListId, $description, $files);
 
+
         $request = $this->requestFactory->createRequest(
             "POST",
             "$this->url" . '/api/v1/document'
@@ -143,6 +142,7 @@ class ComelusWrapper
             ->withHeader('Content-Type', 'multipart/form-data; boundary="' . $builder->getBoundary() . '"')
             ->withAddedHeader('Authorization', 'Bearer ' . $this->apiKey)
             ->withBody($builder->build());
+
 
         try {
             $response = $this->client->sendRequest($request);
@@ -217,6 +217,4 @@ class ComelusWrapper
             throw new ComelusException($e->getMessage(), $e->getCode());
         }
     }
-
-
 }
