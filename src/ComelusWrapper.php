@@ -151,7 +151,13 @@ class ComelusWrapper
         }
 
         if ($response->getStatusCode() != 201) {
-            throw new ComelusException($response->getReasonPhrase(), $response->getStatusCode());
+            $message = $response->getReasonPhrase();
+            if ($response->getBody()) {
+                $content = json_decode($response->getBody()->getContents(), true);
+                $message = $content['message'] ?? $response->getReasonPhrase();
+
+            }
+            throw new ComelusException($message, $response->getStatusCode());
         }
 
         return json_decode($response->getBody()->getContents(), true);
@@ -208,13 +214,20 @@ class ComelusWrapper
 
         try {
             $response = $this->client->sendRequest($request);
-
-            if ($response->getStatusCode() != 200) {
-                throw new ComelusException($response->getReasonPhrase(), $response->getStatusCode());
-            }
-            return json_decode($response->getBody()->getContents(), true);
         } catch (ClientExceptionInterface $e) {
             throw new ComelusException($e->getMessage(), $e->getCode());
         }
+
+        if ($response->getStatusCode() != 200) {
+            $message = $response->getReasonPhrase();
+            if ($response->getBody()) {
+                $content = json_decode($response->getBody()->getContents(), true);
+                $message = $content['message'] ?? $response->getReasonPhrase();
+
+            }
+            throw new ComelusException($message, $response->getStatusCode());
+        }
+
+        return json_decode($response->getBody()->getContents(), true);
     }
 }
