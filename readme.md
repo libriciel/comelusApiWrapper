@@ -8,7 +8,7 @@ php >= 7.2
 ### Installation
 
 ```
-composer require libriciel/comelus-wrapper
+composer require libriciel/comelus-api-wrapper
 ```
 
 ### Initialisation
