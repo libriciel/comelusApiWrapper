@@ -1,6 +1,6 @@
 <?php
 
-
+use Libriciel\ComelusApiWrapper\Model\ComelusDocument;
 use Libriciel\ComelusApiWrapper\ComelusException;
 use Libriciel\ComelusApiWrapper\ComelusWrapper;
 use PHPUnit\Framework\TestCase;
@@ -11,6 +11,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UploadedFileInterface;
+use Nyholm\Psr7\UploadedFile;
 
 class ComelusWrapperTest extends TestCase
 {
@@ -63,6 +64,9 @@ class ComelusWrapperTest extends TestCase
         return $client;
     }
 
+    /**
+     * @throws ComelusException
+     */
     public function testSetUrl()
     {
         $client = $this->createMock(ClientInterface::class);
@@ -116,6 +120,9 @@ class ComelusWrapperTest extends TestCase
     }
 
 
+    /**
+     * @throws ComelusException
+     */
     public function testCheckWrongApiKey()
     {
         $requestFactory = $this->mockRequestFactory();
@@ -135,6 +142,9 @@ class ComelusWrapperTest extends TestCase
         $comelusWrapper->check();
     }
 
+    /**
+     * @throws ComelusException
+     */
     public function testCheck()
     {
         $response = $this->mockResponse(200, '', $this->mockBody('{"success":true}'));
@@ -282,8 +292,17 @@ class ComelusWrapperTest extends TestCase
         $file->method('getClientMediaType')->willReturn("application/pdf");
 
 
-        $content = $comelusWrapper->createDocument(
-            'myDocument', '44edebc7-3299-4da1-94b2-0202245d78db', 'Nouveau document',[$file] );
+        file_put_contents("/tmp/deliberation.pdf", "my streasqdsqd sqdsqd sqdsqd qsdsqd qsdm");
+
+        $comelusDocument = new ComelusDocument();
+        $comelusDocument->setName('deliberation.pdf')
+            ->setMailingListId('uuid')
+            ->setDescription("description")
+            ->setFiles(["test" => new UploadedFile(fopen("/tmp/deliberation.pdf", "r"), 100, 0, "deliberation.pdf", "application/pdf")])
+            ->setFilesInfos( [["name" => "deliberation.pdf", "rank" => 1, "linkedFile" => "test"]]);
+
+
+        $content = $comelusWrapper->createDocument($comelusDocument);
 
         $this->assertSame($expected, $content);
 
@@ -293,16 +312,24 @@ class ComelusWrapperTest extends TestCase
         $client = $this->createMock(ClientInterface::class);
         $requestFactory = $this->mockRequestFactory();
         $streamFactory = $this->createMock(StreamFactoryInterface::class);
+        $comelusDocument = $this->createMock(ComelusDocument::class);
+
 
         $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
         $comelusWrapper->setUrl("https://comelus.fr");
         $comelusWrapper->setApiKey("MyApiKey");
 
         $this->expectException(ComelusException::class);
-        $this->expectExceptionMessage('name, mailingListId, $files, desriptions cannot be empty');
+        $this->expectExceptionMessage('name, mailingListId, $files, desriptions and filesInfos cannot be empty');
         $this->expectExceptionCode(400);
 
-        $comelusWrapper->createDocument('name', 'uuid', 'description', []);
+        $comelusDocument->method('getName')->willReturn('name');
+        $comelusDocument->method('getMailingListId')->willReturn('uuid');
+        $comelusDocument->method('getDescription')->willReturn('description');
+        $comelusDocument->method('getFiles')->willReturn([]);
+        $comelusDocument->method('getFilesInfos')->willReturn([]);
+
+        $comelusWrapper->createDocument($comelusDocument);
     }
 
 
