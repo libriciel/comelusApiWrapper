@@ -3,6 +3,7 @@
 namespace Libriciel\ComelusApiWrapper;
 
 use Http\Message\MultipartStream\MultipartStreamBuilder;
+use Libriciel\ComelusApiWrapper\Model\ComelusDocument;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
@@ -13,40 +14,27 @@ class ComelusWrapper
 {
 
     /**
-     * @var ClientInterface
-     */
-    private $client;
-    /**
-     * @var RequestFactoryInterface
-     */
-    private $requestFactory;
-
-    /**
      * @var string
      */
-    private $url;
-    /**
+    private string $url;
+
+    /*
      * @var string
      */
     private $apiKey;
-    /**
-     * @var StreamFactoryInterface
-     */
-    private $streamFactory;
 
-    public function __construct(ClientInterface $client, RequestFactoryInterface $requestFactory, StreamFactoryInterface $streamFactory)
-    {
-        $this->client = $client;
-        $this->requestFactory = $requestFactory;
-        $this->streamFactory = $streamFactory;
-    }
+    public function __construct(
+        private  readonly ClientInterface $client,
+        private readonly RequestFactoryInterface $requestFactory,
+        private readonly StreamFactoryInterface $streamFactory,
+    )
+    {}
 
     /**
-     * @param string $url comelus main url with http|s
-     *
+     * @param string $url comelus main url with http|s     *
      * @throws ComelusException
      */
-    public function setUrl(string $url)
+    public function setUrl(string $url): void
     {
         $httpRegex = "~^((https?)://).+$~";
         if (!preg_match($httpRegex, $url)) {
@@ -60,7 +48,7 @@ class ComelusWrapper
      * @param string $apiKey apikey from comelus structure
      * @throws ComelusException
      */
-    public function setApiKey(string $apiKey)
+    public function setApiKey(string $apiKey): void
     {
         $noWhitespace = "~^^\S+$~";
 
@@ -75,7 +63,7 @@ class ComelusWrapper
      *
      * @throws ComelusException
      */
-    private function isInit()
+    private function isInit(): void
     {
         if (!$this->url || !$this->apiKey) {
             throw new ComelusException("url and apiKey must be set", 400);
@@ -85,9 +73,9 @@ class ComelusWrapper
     /**
      * @throws ComelusException
      */
-    public function check()
+    public function check(): array
     {
-        return $this->sendRequest('/api/v1/check');
+        return $this->sendRequest('/api/v110/check');
     }
 
 
@@ -96,7 +84,7 @@ class ComelusWrapper
      */
     public function getMailingLists(): array
     {
-        return $this->sendRequest('/api/v1/mailing-list');
+        return $this->sendRequest('/api/v110/mailing-list');
     }
 
     /**
@@ -104,7 +92,7 @@ class ComelusWrapper
      */
     public function getDocuments(): array
     {
-        return $this->sendRequest('/api/v1/document');
+        return $this->sendRequest('/api/v110/document');
     }
 
     /**
@@ -114,30 +102,36 @@ class ComelusWrapper
      */
     public function getDocumentStatus(string $documentId): array
     {
-        return $this->sendRequest("/api/v1/document/$documentId/status");
+        return $this->sendRequest("/api/v110/document/$documentId/status");
     }
 
 
     /**
-     * @param string $name
-     * @param string $mailingListId
-     * @param string $description
-     * @param UploadedFileInterface[] $files
+     * @param ComelusDocument $comelusDocument
+     * @return mixed
      * @throws ComelusException
      */
-    public function createDocument(string $name, string $mailingListId, string $description, array $files)
+    public function createDocument(ComelusDocument $comelusDocument): mixed
     {
         $this->isInit();
-        if (empty($name) || empty($mailingListId) || empty($files) || empty($description)) {
-            throw new ComelusException('name, mailingListId, $files, desriptions cannot be empty', 400);
+
+
+        if (!$this->isValid($comelusDocument)) {
+            throw new ComelusException('name, mailingListId, $files, desriptions and filesInfos cannot be empty', 400);
         }
 
-        $builder = $this->prepareMultipart($name, $mailingListId, $description, $files);
+        $builder = $this->prepareMultipart(
+            $comelusDocument->getName(),
+            $comelusDocument->getMailingListId(),
+            $comelusDocument->getDescription(),
+            $comelusDocument->getFiles(),
+            $comelusDocument->getFilesInfos()
+        );
 
 
         $request = $this->requestFactory->createRequest(
             "POST",
-            "$this->url" . '/api/v1/document'
+            "$this->url" . '/api/v110/document'
         )
             ->withHeader('Content-Type', 'multipart/form-data; boundary="' . $builder->getBoundary() . '"')
             ->withAddedHeader('Authorization', 'Bearer ' . $this->apiKey)
@@ -163,14 +157,25 @@ class ComelusWrapper
         return json_decode($response->getBody()->getContents(), true);
     }
 
+    private function isValid(ComelusDocument $comelusDocument): bool
+    {
+        return !empty($comelusDocument->getName())
+            && !empty($comelusDocument->getMailingListId())
+            && !empty($comelusDocument->getFiles())
+            && !empty($comelusDocument->getDescription())
+            && !empty($comelusDocument->getFilesInfos());
+    }
 
-    private function prepareMultipart(string $name, string $mailingListId, string $description, array $files): MultipartStreamBuilder
+
+    private function prepareMultipart(string $name, string $mailingListId, string $description, array $files, array $filesInfos): MultipartStreamBuilder
     {
         $builder = new MultipartStreamBuilder($this->streamFactory);
 
-        foreach ($files as $file) {
+        /** @var UploadedFileInterface $file */
+        foreach ($files as $key => $file) {
+
             $builder->addResource(
-                'attachedFiles[]',
+                "attachedFiles[$key]",
                 $file->getStream(),
                 [
                     'filename' => $file->getClientFilename(),
@@ -182,6 +187,7 @@ class ComelusWrapper
         $builder->addResource('name', $name);
         $builder->addResource('mailingListId', $mailingListId);
         $builder->addResource('description', $description);
+        $builder->addResource('filesInfos', json_encode($filesInfos));
 
         return $builder;
     }
@@ -191,11 +197,10 @@ class ComelusWrapper
      * @return array
      * @throws ComelusException
      */
-    public function sendDocument(string $documentId)
+    public function sendDocument(string $documentId): array
     {
-        return $this->sendRequest("/api/v1/document/$documentId/send", 'POST');
+        return $this->sendRequest("/api/v110/document/$documentId/send", 'POST');
     }
-
 
     /**
      *
@@ -204,7 +209,7 @@ class ComelusWrapper
      * @return array
      * @throws ComelusException
      */
-    private function sendRequest(string $path, $method = 'GET'): array
+    private function sendRequest(string $path, string $method = 'GET'): array
     {
         $this->isInit();
         $request = $this->requestFactory->createRequest(
