@@ -4,15 +4,16 @@ stages:
 
 unit_test:
   stage: test
-  image : php:7.2
+  image: hubdocker.libriciel.fr/php:8.3
   before_script:
-    - apt-get -y update && apt-get -y install git zip zlib1g-dev
+    - apt-get -y update && apt-get -y install git zip zlib1g-dev libzip-dev
     - docker-php-ext-install zip
     - pecl install xdebug && docker-php-ext-enable xdebug
     - php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
     - php composer-setup.php --install-dir=/usr/local/bin
     - mv /usr/local/bin/composer.phar /usr/local/bin/composer
-
+  variables:
+    XDEBUG_MODE: coverage
   script:
     - composer install
     - vendor/bin/phpunit --coverage-text --colors=never --coverage-clover coverage/coverage.xml --log-junit coverage/logfile.xml
