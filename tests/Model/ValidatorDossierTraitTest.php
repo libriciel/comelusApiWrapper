@@ -1,0 +1,83 @@
+<?php
+
+namespace Libriciel\ComelusApiWrapper\Test\Model;
+
+use Libriciel\ComelusApiWrapper\ComelusException;
+use Libriciel\ComelusApiWrapper\Model\Dossier;
+use Libriciel\ComelusApiWrapper\Model\ValidatorDossierTrait;
+use PHPUnit\Framework\TestCase;
+use Symfony\Component\Uid\Uuid;
+
+class ValidatorDossierTraitTest extends TestCase
+{
+    private function makeValidator(): object
+    {
+        return new class {
+            use ValidatorDossierTrait;
+        };
+    }
+
+    public function testValidateDossierNameWithValidValuePasses(): void
+    {
+        $validator = $this->makeValidator();
+        $validator->validateDossierName('Projet Alpha');
+        $this->assertTrue(true);
+    }
+
+    public function testValidateDossierNameLength(): void
+    {
+        $validator = $this->makeValidator();
+        $long = str_repeat('a', Dossier::MAX_LENGTH_DOSSIER_NAME);
+        $validator->validateDossierName($long);
+        $this->assertTrue(true);
+    }
+
+    public function testValidateDossierNameWithEmptyStringThrowsException(): void
+    {
+        $validator = $this->makeValidator();
+        $this->expectException(ComelusException::class);
+        $this->expectExceptionMessage('dossier name must be not empty');
+        $validator->validateDossierName('');
+    }
+
+    public function testValidateDossierNameWithWhitespaceOnlyThrowsException(): void
+    {
+        $validator = $this->makeValidator();
+        $this->expectException(ComelusException::class);
+        $this->expectExceptionMessage('dossier name must be not empty');
+        $validator->validateDossierName('   ');
+    }
+
+    public function testValidateDossierNameExceedingMaxLengthThrowsException(): void
+    {
+        $validator = $this->makeValidator();
+        $tooLong = str_repeat('a', Dossier::MAX_LENGTH_DOSSIER_NAME + 1);
+        $this->expectException(ComelusException::class);
+        $this->expectExceptionMessage("The field 'dossier name' must not exceed " . Dossier::MAX_LENGTH_DOSSIER_NAME . ' characters.');
+        $validator->validateDossierName($tooLong);
+    }
+
+    public function testValidateMailingListIdWithValidUuidPasses(): void
+    {
+        $validator = $this->makeValidator();
+        $uuid = Uuid::v7()->toRfc4122();
+        $validator->validateMailingListId($uuid);
+        $this->assertTrue(true);
+    }
+
+    public function testValidateMailingListIdWithEmptyStringThrowsException(): void
+    {
+        $validator = $this->makeValidator();
+        $this->expectException(ComelusException::class);
+        $this->expectExceptionMessage('dossier mailingListId must be not empty');
+        $validator->validateMailingListId('');
+    }
+
+    public function testValidateMailingListIdWithInvalidUuidThrowsException(): void
+    {
+        $validator = $this->makeValidator();
+        $this->expectException(ComelusException::class);
+        $this->expectExceptionMessage('dossier mailingListId is not id valid');
+        $validator->validateMailingListId('invalid-uuid');
+    }
+}

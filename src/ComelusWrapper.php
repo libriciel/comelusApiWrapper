@@ -3,39 +3,30 @@
 namespace Libriciel\ComelusApiWrapper;
 
 use Http\Message\MultipartStream\MultipartStreamBuilder;
+use Libriciel\ComelusApiWrapper\Model\Annexe;
+use Libriciel\ComelusApiWrapper\Model\Dossier;
+use Libriciel\ComelusApiWrapper\Model\File;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
-use Psr\Http\Message\UploadedFileInterface;
+use Symfony\Component\HttpFoundation\Response;
 
 class ComelusWrapper
 {
+    private string $baseRoutePath = '/api/v2';
 
-    /**
-     * @var ClientInterface
-     */
     private $client;
-    /**
-     * @var RequestFactoryInterface
-     */
     private $requestFactory;
-
-    /**
-     * @var string
-     */
     private $url;
-    /**
-     * @var string
-     */
     private $apiKey;
-    /**
-     * @var StreamFactoryInterface
-     */
     private $streamFactory;
 
-    public function __construct(ClientInterface $client, RequestFactoryInterface $requestFactory, StreamFactoryInterface $streamFactory)
-    {
+    public function __construct(
+        ClientInterface $client,
+        RequestFactoryInterface $requestFactory,
+        StreamFactoryInterface $streamFactory
+    ) {
         $this->client = $client;
         $this->requestFactory = $requestFactory;
         $this->streamFactory = $streamFactory;
@@ -46,103 +37,95 @@ class ComelusWrapper
      *
      * @throws ComelusException
      */
-    public function setUrl(string $url)
+    public function setUrl(string $url): void
     {
         $httpRegex = "~^((https?)://).+$~";
         if (!preg_match($httpRegex, $url)) {
-            throw new ComelusException("malformed url : missing http|https", 400);
+            throw new ComelusException("malformed url : missing http|https", Response::HTTP_BAD_REQUEST);
         }
         $this->url = $url;
     }
-
 
     /**
      * @param string $apiKey apikey from comelus structure
      * @throws ComelusException
      */
-    public function setApiKey(string $apiKey)
+    public function setApiKey(string $apiKey): void
     {
         $noWhitespace = "~^^\S+$~";
 
         if (!preg_match($noWhitespace, $apiKey)) {
-            throw new ComelusException("malformed apiKey : no whitespace allowed", 400);
+            throw new ComelusException("malformed apiKey : no whitespace allowed", Response::HTTP_BAD_REQUEST);
         }
         $this->apiKey = $apiKey;
     }
 
-
     /**
-     *
      * @throws ComelusException
      */
-    private function isInit()
+    private function isInit(): void
     {
-        if (!$this->url || !$this->apiKey) {
-            throw new ComelusException("url and apiKey must be set", 400);
+        if (!$this->url && !$this->apiKey) {
+            throw new ComelusException("url and apiKey must be set", Response::HTTP_BAD_REQUEST);
+        }
+
+        if (!$this->url) {
+            throw new ComelusException("url must be set", Response::HTTP_BAD_REQUEST);
+        }
+
+        if (!$this->apiKey) {
+            throw new ComelusException("apiKey must be set", Response::HTTP_BAD_REQUEST);
         }
     }
 
     /**
      * @throws ComelusException
      */
-    public function check()
+    public function check(): array
     {
-        return $this->sendRequest('/api/v1/check');
+        return $this->sendRequest($this->baseRoutePath . '/check');
     }
-
 
     /**
      * @throws ComelusException
      */
     public function getMailingLists(): array
     {
-        return $this->sendRequest('/api/v1/mailing-list');
+        return $this->sendRequest($this->baseRoutePath . '/mailing-lists');
     }
 
     /**
      * @throws ComelusException
      */
-    public function getDocuments(): array
+    public function getDossiers(): array
     {
-        return $this->sendRequest('/api/v1/document');
+        return $this->sendRequest($this->baseRoutePath . '/dossiers');
     }
 
     /**
-     * @param string $documentId
+     * @param string $dossierId
      * @return array
      * @throws ComelusException
      */
-    public function getDocumentStatus(string $documentId): array
+    public function getDossierStatus(string $dossierId): array
     {
-        return $this->sendRequest("/api/v1/document/$documentId/status");
+        return $this->sendRequest($this->baseRoutePath . "/dossier/$dossierId/status");
     }
 
-
-    /**
-     * @param string $name
-     * @param string $mailingListId
-     * @param string $description
-     * @param UploadedFileInterface[] $files
-     * @throws ComelusException
-     */
-    public function createDocument(string $name, string $mailingListId, string $description, array $files)
+    public function createDossier(Dossier $dossier)
     {
         $this->isInit();
-        if (empty($name) || empty($mailingListId) || empty($files) || empty($description)) {
-            throw new ComelusException('name, mailingListId, $files, desriptions cannot be empty', 400);
-        }
 
-        $builder = $this->prepareMultipart($name, $mailingListId, $description, $files);
-
+        $builder = $this->prepareMultipart($dossier);
 
         $request = $this->requestFactory->createRequest(
-            "POST",
-            "$this->url" . '/api/v1/document'
-        )
+                "POST",
+                "$this->url" . $this->baseRoutePath . '/dossier'
+            )
             ->withHeader('Content-Type', 'multipart/form-data; boundary="' . $builder->getBoundary() . '"')
             ->withAddedHeader('Authorization', 'Bearer ' . $this->apiKey)
-            ->withBody($builder->build());
-
+            ->withBody($builder->build())
+        ;
 
         try {
             $response = $this->client->sendRequest($request);
@@ -150,61 +133,71 @@ class ComelusWrapper
             throw new ComelusException($e->getMessage(), $e->getCode());
         }
 
-        if ($response->getStatusCode() != 201) {
+        if ($response->getStatusCode() != Response::HTTP_CREATED) {
             $message = $response->getReasonPhrase();
             if ($response->getBody()) {
                 $content = json_decode($response->getBody()->getContents(), true);
                 $message = $content['message'] ?? $response->getReasonPhrase();
 
             }
+
             throw new ComelusException($message, $response->getStatusCode());
         }
 
         return json_decode($response->getBody()->getContents(), true);
     }
 
-
-    private function prepareMultipart(string $name, string $mailingListId, string $description, array $files): MultipartStreamBuilder
+    private function prepareMultipart(Dossier $dossier): MultipartStreamBuilder
     {
         $builder = new MultipartStreamBuilder($this->streamFactory);
 
-        foreach ($files as $file) {
-            $builder->addResource(
-                'attachedFiles[]',
-                $file->getStream(),
+        $builder->addResource("name", $dossier->getName());
+        $builder->addResource("description", $dossier->getDescription());
+        $builder->addResource("mailingListId", $dossier->getMailingListId());
+
+        /** @var File $file */
+        foreach ($dossier->getAttachedFiles() as $key => $file) {
+            $builder->addResource("attachedFiles[{$key}][category]", $file->getCategory());
+            $builder->addResource("attachedFiles[{$key}][name]", $file->getName());
+            $builder->addResource("attachedFiles[{$key}][rank]", strval($file->getRank()));
+            $builder->addResource("attachedFiles[{$key}][uploadedfile]",
+                fopen($file->getUploadedfile()->getPathname(), 'r'),
                 [
-                    'filename' => $file->getClientFilename(),
-                    'headers' => ['Content-Type' => $file->getClientMediaType()]
+                    'filename' => $file->getUploadedfile()->getClientOriginalName(),
+                    'headers' => ['Content-Type' => $file->getUploadedfile()->getMimeType()]
                 ]
             );
-        }
 
-        $builder->addResource('name', $name);
-        $builder->addResource('mailingListId', $mailingListId);
-        $builder->addResource('description', $description);
+            /** @var Annexe $annexe */
+            foreach ($file->getAnnexes() as $keyAnnexe => $annexe) {
+                $builder->addResource("attachedFiles[{$key}][annexes][{$keyAnnexe}][name]", $annexe->getName());
+                $builder->addResource("attachedFiles[{$key}][annexes][{$keyAnnexe}][rank]", strval($annexe->getRank()));
+                $builder->addResource(
+                    "attachedFiles[{$key}][annexes][{$keyAnnexe}][uploadedfile]",
+                    fopen($annexe->getUploadedfile()->getPathname(), 'r'),
+                    [
+                        'filename' => $annexe->getUploadedfile()->getClientOriginalName(),
+                        'headers' => ['Content-Type' => $annexe->getUploadedfile()->getMimeType()]
+                    ]
+                );
+            }
+        }
 
         return $builder;
     }
 
     /**
-     * @param string $documentId
-     * @return array
      * @throws ComelusException
      */
-    public function sendDocument(string $documentId)
+    public function sendDocument(string $documentId): array
     {
-        return $this->sendRequest("/api/v1/document/$documentId/send", 'POST');
+        return $this->sendRequest($this->baseRoutePath . "/dossier/$documentId/send", 'POST');
     }
 
-
     /**
-     *
-     * @param string $path
-     * @param string $method
-     * @return array
      * @throws ComelusException
      */
-    private function sendRequest(string $path, $method = 'GET'): array
+    private function sendRequest(string $path, string $method = 'GET'): array
     {
         $this->isInit();
         $request = $this->requestFactory->createRequest(
@@ -218,7 +211,7 @@ class ComelusWrapper
             throw new ComelusException($e->getMessage(), $e->getCode());
         }
 
-        if ($response->getStatusCode() != 200) {
+        if ($response->getStatusCode() != Response::HTTP_OK) {
             $message = $response->getReasonPhrase();
             if ($response->getBody()) {
                 $content = json_decode($response->getBody()->getContents(), true);

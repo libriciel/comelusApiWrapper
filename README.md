@@ -3,7 +3,8 @@
 Wrapper php de l'api de comelus.
 
 ### Prérequis
-php >= 7.2
+PHP >= 8.3
+Compatible uniquement avec ComElus v1.3.0
 
 ### Installation
 
