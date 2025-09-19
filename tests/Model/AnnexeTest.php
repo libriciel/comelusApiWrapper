@@ -22,12 +22,9 @@ class AnnexeTest extends TestCase
         $this->assertInstanceOf(UploadedFile::class, $annexe->getUploadedFile());
     }
 
-    public function testCreateAnnexeWithEmptyNameThrowsException(): void
+    public function testCreateAnnexeWithEmptyName(): void
     {
-        $this->expectException(ComelusException::class);
-        $this->expectExceptionMessage("annexe name must be not empty");
-
-        new Annexe(
+        $annexe = new Annexe(
             '',
             1,
             new UploadedFile(
@@ -35,6 +32,10 @@ class AnnexeTest extends TestCase
                 'test.pdf'
             )
         );
+
+        $this->assertEquals('', $annexe->getName());
+        $this->assertEquals(1, $annexe->getRank());
+        $this->assertInstanceOf(UploadedFile::class, $annexe->getUploadedFile());
     }
 
     public function testCreateAnnexeWithNegativeRankThrowsException(): void

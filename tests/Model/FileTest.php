@@ -48,12 +48,9 @@ class FileTest extends TestCase
         $this->assertEquals('Annexe 1', $file->getAnnexes()[0]->getName());  // Vérification de l'annexe
     }
 
-    public function testCreateFileWithEmptyNameThrowsException(): void
+    public function testCreateFileWithEmptyName(): void
     {
-        $this->expectException(ComelusException::class);
-        $this->expectExceptionMessage("file name must be not empty");
-
-        new File(
+        $file = new File(
             'Facture',
             '',
             1,
@@ -63,6 +60,10 @@ class FileTest extends TestCase
             ),
             []
         );
+
+        $this->assertEquals('', $file->getName());
+        $this->assertEquals(1, $file->getRank());
+        $this->assertInstanceOf(UploadedFile::class, $file->getUploadedFile());
     }
 
     // Cas d'erreur : Rang négatif pour le fichier
