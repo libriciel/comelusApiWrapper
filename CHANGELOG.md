@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [3.0.0] - 2025-09-17
+## [3.0.0] - 2025-09-19
 
 ### Evolutions
 - Mise à jour de sécurité (composer et npm)
