@@ -1,5 +1,6 @@
 {
     "name": "libriciel/comelus-api-wrapper",
+    "license": "AGPL v3",
     "version": "3.0.0",
     "authors": [
         {

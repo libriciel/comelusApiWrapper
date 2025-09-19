@@ -20,7 +20,6 @@ class File
             $this->validateLength($category, 255, 'file category');
         }
 
-        $this->validateString($name, 'file name');
         $this->validateLength($name, 512, 'file name');
         $this->validatePositiveInt($rank, 'file rank');
         $this->validateUploadedFile($uploadedfile, 'file uploadedfile');

@@ -13,8 +13,7 @@ class Annexe
         private readonly int $rank,
         private readonly UploadedFile $uploadedfile,
     ) {
-        $this->validateString($name, 'annexe name');
-        $this->validateLength($name, 512, 'file name');
+        $this->validateLength($name, 512, 'annexe name');
         $this->validatePositiveInt($rank, 'annexe rank');
         $this->validateUploadedFile($uploadedfile, 'annexe uploadedfile');
     }
