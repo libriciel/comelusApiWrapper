@@ -66,6 +66,25 @@ class FileTest extends TestCase
         $this->assertInstanceOf(UploadedFile::class, $file->getUploadedFile());
     }
 
+    public function testCreateFileWithNameToLongThrowsException(): void
+    {
+        $this->expectException(ComelusException::class);
+        $this->expectExceptionMessage("The field 'file name' must not exceed 512 characters.");
+
+        $fileName = substr(str_repeat(md5((string) mt_rand()), 513), 0, 513);
+
+        new File(
+            'Facture',
+            $fileName,
+            1,
+            new UploadedFile(
+                __DIR__ . '/../resources/test.pdf',
+                'test.pdf'
+            ),
+            []
+        );
+    }
+
     // Cas d'erreur : Rang négatif pour le fichier
     public function testCreateFileWithNegativeRankThrowsException(): void
     {
@@ -82,5 +101,91 @@ class FileTest extends TestCase
             ),
             []
         );
+    }
+
+    // Catégorie vide doit lever une exception
+    public function testCreateFileWithEmptyCategoryThrowsException(): void
+    {
+        $this->expectException(ComelusException::class);
+        $this->expectExceptionMessage("file category must be not empty");
+
+        new File(
+            '',
+            'facture.pdf',
+            1,
+            new UploadedFile(
+                __DIR__ . '/../resources/test.pdf',
+                'test.pdf'
+            ),
+            []
+        );
+    }
+
+    // Catégorie trop longue (>255) doit lever une exception
+    public function testCreateFileWithCategoryToLongThrowsException(): void
+    {
+        $this->expectException(ComelusException::class);
+        $this->expectExceptionMessage("The field 'file category' must not exceed 255 characters.");
+
+        $category = substr(str_repeat(md5((string) mt_rand()), 256), 0, 256);
+
+        new File(
+            $category,
+            'facture.pdf',
+            1,
+            new UploadedFile(
+                __DIR__ . '/../resources/test.pdf',
+                'test.pdf'
+            ),
+            []
+        );
+    }
+
+    // Rang égal à 0 est autorisé
+    public function testCreateFileWithZeroRankIsAllowed(): void
+    {
+        $uploadedFile = new UploadedFile(
+            __DIR__ . '/../resources/test.pdf',
+            'test.pdf'
+        );
+
+        $file = new File('Facture', 'facture.pdf', 0, $uploadedFile, []);
+
+        $this->assertEquals(0, $file->getRank());
+        $this->assertInstanceOf(UploadedFile::class, $file->getUploadedFile());
+    }
+
+    // Annexes null doivent être converties en tableau vide
+    public function testCreateFileWithNullAnnexesDefaultsToEmptyArray(): void
+    {
+        $uploadedFile = new UploadedFile(
+            __DIR__ . '/../resources/test.pdf',
+            'test.pdf'
+        );
+
+        $file = new File('Facture', 'facture.pdf', 1, $uploadedFile, null);
+
+        $this->assertIsArray($file->getAnnexes());
+        $this->assertCount(0, $file->getAnnexes());
+    }
+
+    // addAnnexe ajoute bien l'annexe à la liste
+    public function testAddAnnexeAppendsToAnnexes(): void
+    {
+        $uploadedFile = new UploadedFile(
+            __DIR__ . '/../resources/test.pdf',
+            'test.pdf'
+        );
+        $file = new File('Facture', 'facture.pdf', 1, $uploadedFile, []);
+
+        $annexe1 = new Annexe('Annexe 1', 1, $uploadedFile);
+        $annexe2 = new Annexe('Annexe 2', 2, $uploadedFile);
+
+        $file->addAnnexe($annexe1);
+        $file->addAnnexe($annexe2);
+
+        $this->assertCount(2, $file->getAnnexes());
+        $this->assertEquals('Annexe 1', $file->getAnnexes()[0]->getName());
+        $this->assertEquals('Annexe 2', $file->getAnnexes()[1]->getName());
     }
 }

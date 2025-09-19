@@ -38,6 +38,37 @@ class AnnexeTest extends TestCase
         $this->assertInstanceOf(UploadedFile::class, $annexe->getUploadedFile());
     }
 
+    public function testCreateAnnexeWithMaxNameLengthAllowed(): void
+    {
+        $maxName = str_repeat('a', 512);
+        $uploadedFile = new UploadedFile(
+            __DIR__ . '/../resources/test.pdf',
+            'test.pdf'
+        );
+
+        $annexe = new Annexe($maxName, 1, $uploadedFile);
+
+        $this->assertEquals($maxName, $annexe->getName());
+        $this->assertInstanceOf(UploadedFile::class, $annexe->getUploadedFile());
+    }
+
+    public function testCreateAnnexeWithNameToLongThrowsException(): void
+    {
+        $this->expectException(ComelusException::class);
+        $this->expectExceptionMessage("The field 'annexe name' must not exceed 512 characters.");
+
+        $annexeName = substr(str_repeat(md5((string) mt_rand()), 513), 0, 513);
+
+        new Annexe(
+            $annexeName,
+            1,
+            new UploadedFile(
+                __DIR__ . '/../resources/test.pdf',
+                'test.pdf'
+            )
+        );
+    }
+
     public function testCreateAnnexeWithNegativeRankThrowsException(): void
     {
         $this->expectException(ComelusException::class);
@@ -51,6 +82,19 @@ class AnnexeTest extends TestCase
                 'test.pdf'
             )
         );
+    }
+
+    public function testCreateAnnexeWithZeroRankIsAllowed(): void
+    {
+        $uploadedFile = new UploadedFile(
+            __DIR__ . '/../resources/test.pdf',
+            'test.pdf'
+        );
+
+        $annexe = new Annexe('Annexe 0', 0, $uploadedFile);
+
+        $this->assertEquals(0, $annexe->getRank());
+        $this->assertInstanceOf(UploadedFile::class, $annexe->getUploadedFile());
     }
 
 //    public function testCreateAnnexeWithNoUploadedFileThrowsException(): void
