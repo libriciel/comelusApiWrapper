@@ -81,6 +81,21 @@ final class ValidatorTraitTest extends TestCase
         $validator->validateUploadedFile($uploadedFile, 'file uploadedfile is not a valid uploaded file');
     }
 
+    public function testValidateUploadedFileWithDeletedFileThrowsException(): void
+    {
+        $validator = $this->makeValidator();
+        $path = tempnam(sys_get_temp_dir(), 'comelus');
+        $this->assertIsString($path);
+        $uploadedFile = new UploadedFile($path, 'deleted.pdf');
+        unlink($path);
+
+        $this->expectException(ComelusException::class);
+        $this->expectExceptionMessage('annexe uploadedFile file not found');
+        $this->expectExceptionCode(400);
+
+        $validator->validateUploadedFile($uploadedFile, 'annexe uploadedFile');
+    }
+
     public function testIsValidUuidReturnsTrueForValidUuid(): void
     {
         $validator = $this->makeValidator();

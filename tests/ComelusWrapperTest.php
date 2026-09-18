@@ -6,18 +6,24 @@ namespace Libriciel\ComelusApiWrapper\Test;
 
 use Libriciel\ComelusApiWrapper\ComelusException;
 use Libriciel\ComelusApiWrapper\ComelusWrapper;
+use Libriciel\ComelusApiWrapper\Model\Annexe;
 use Libriciel\ComelusApiWrapper\Model\Dossier;
 use Libriciel\ComelusApiWrapper\Model\File;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
+use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use RuntimeException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Uid\Uuid;
 
 final class ComelusWrapperTest extends TestCase
 {
+    private ?RequestInterface $sentRequest = null;
+
     private function createResponse(int $statusCode, string $body, string $reasonPhrase = ''): ResponseInterface
     {
         $factory = new Psr17Factory();
@@ -32,6 +38,56 @@ final class ComelusWrapperTest extends TestCase
         $client->method('sendRequest')->willReturn($response);
 
         return $client;
+    }
+
+    /**
+     * Client qui renvoie $response et garde la requête envoyée dans $this->sentRequest.
+     */
+    private function capturingClient(ResponseInterface $response): ClientInterface
+    {
+        $client = $this->createStub(ClientInterface::class);
+        $client->method('sendRequest')->willReturnCallback(
+            function (RequestInterface $request) use ($response): ResponseInterface {
+                $this->sentRequest = $request;
+
+                return $response;
+            }
+        );
+
+        return $client;
+    }
+
+    private function failingClient(): ClientInterface
+    {
+        $client = $this->createStub(ClientInterface::class);
+        $client->method('sendRequest')->willThrowException(
+            new class('Could not resolve host', 6) extends RuntimeException implements ClientExceptionInterface {
+            }
+        );
+
+        return $client;
+    }
+
+    private function createWrapper(ClientInterface $client): ComelusWrapper
+    {
+        $factory = new Psr17Factory();
+        $comelusWrapper = new ComelusWrapper($client, $factory, $factory);
+        $comelusWrapper->setUrl('https://comelus.fr');
+        $comelusWrapper->setApiKey('myapiKey');
+
+        return $comelusWrapper;
+    }
+
+    private function createDossierWithOneFile(): Dossier
+    {
+        $uploadedFile = new UploadedFile(__DIR__ . '/resources/test.pdf', 'test.pdf');
+
+        return new Dossier(
+            'myDocument',
+            'Nouveau document',
+            '44edebc7-3299-4da1-94b2-0202245d78db',
+            [new File('Projets', 'Délibération', 1, $uploadedFile, [])]
+        );
     }
 
     public function testSetUrl()
@@ -580,5 +636,127 @@ final class ComelusWrapperTest extends TestCase
         );
 
         $comelusWrapper->createDossier($dossier);
+    }
+
+    public function testCheckSendsGetRequestWithBearerToken(): void
+    {
+        $comelusWrapper = $this->createWrapper($this->capturingClient($this->createResponse(200, '{"success":true}')));
+
+        $comelusWrapper->check();
+
+        $this->assertNotNull($this->sentRequest);
+        $this->assertSame('GET', $this->sentRequest->getMethod());
+        $this->assertSame('https://comelus.fr/api/v2/check', (string) $this->sentRequest->getUri());
+        $this->assertSame('Bearer myapiKey', $this->sentRequest->getHeaderLine('Authorization'));
+    }
+
+    public function testSendDocumentSendsPostRequest(): void
+    {
+        $comelusWrapper = $this->createWrapper($this->capturingClient($this->createResponse(200, '{"success":true}')));
+
+        $comelusWrapper->sendDocument('51edebc7-3299-4da1-94b2-0205745d78db');
+
+        $this->assertNotNull($this->sentRequest);
+        $this->assertSame('POST', $this->sentRequest->getMethod());
+        $this->assertSame(
+            'https://comelus.fr/api/v2/dossier/51edebc7-3299-4da1-94b2-0205745d78db/send',
+            (string) $this->sentRequest->getUri()
+        );
+    }
+
+    public function testCheckNetworkErrorThrowsComelusException(): void
+    {
+        $comelusWrapper = $this->createWrapper($this->failingClient());
+
+        $this->expectException(ComelusException::class);
+        $this->expectExceptionMessage('Could not resolve host');
+        $this->expectExceptionCode(6);
+
+        $comelusWrapper->check();
+    }
+
+    public function testCheckErrorResponseUsesMessageFromJsonBody(): void
+    {
+        $response = $this->createResponse(403, '{"message":"Structure désactivée"}', 'Forbidden');
+        $comelusWrapper = $this->createWrapper($this->stubClient($response));
+
+        $this->expectException(ComelusException::class);
+        $this->expectExceptionMessage('Structure désactivée');
+        $this->expectExceptionCode(403);
+
+        $comelusWrapper->check();
+    }
+
+    public function testCheckErrorResponseWithoutJsonUsesReasonPhrase(): void
+    {
+        $response = $this->createResponse(502, '<html>Bad Gateway</html>', 'Bad Gateway');
+        $comelusWrapper = $this->createWrapper($this->stubClient($response));
+
+        $this->expectException(ComelusException::class);
+        $this->expectExceptionMessage('Bad Gateway');
+        $this->expectExceptionCode(502);
+
+        $comelusWrapper->check();
+    }
+
+    public function testCreateDossierSendsMultipartRequestWithFilesAndAnnexes(): void
+    {
+        $uploadedFile = new UploadedFile(__DIR__ . '/resources/test.pdf', 'test.pdf');
+        $file = new File('Projets', 'Délibération', 1, $uploadedFile, []);
+        $file->addAnnexe(new Annexe('Annexe 1', 1, $uploadedFile));
+        $file->addAnnexe(new Annexe('Annexe 2', 2, $uploadedFile));
+        $dossier = new Dossier('myDocument', 'Nouveau document', '44edebc7-3299-4da1-94b2-0202245d78db', [$file]);
+
+        $response = $this->createResponse(201, '{"success":true,"id":"da781241-3c2c-420c-90f8-f2f83df99c74"}');
+        $comelusWrapper = $this->createWrapper($this->capturingClient($response));
+
+        $content = $comelusWrapper->createDossier($dossier);
+
+        $this->assertSame(['success' => true, 'id' => 'da781241-3c2c-420c-90f8-f2f83df99c74'], $content);
+        $this->assertNotNull($this->sentRequest);
+        $this->assertSame('POST', $this->sentRequest->getMethod());
+        $this->assertSame('https://comelus.fr/api/v2/dossier', (string) $this->sentRequest->getUri());
+        $this->assertSame('Bearer myapiKey', $this->sentRequest->getHeaderLine('Authorization'));
+        $this->assertStringStartsWith('multipart/form-data; boundary=', $this->sentRequest->getHeaderLine('Content-Type'));
+
+        $body = (string) $this->sentRequest->getBody();
+        foreach ([
+            'name' => 'myDocument',
+            'mailingListId' => '44edebc7-3299-4da1-94b2-0202245d78db',
+            'attachedFiles[0][category]' => 'Projets',
+            'attachedFiles[0][name]' => 'Délibération',
+            'attachedFiles[0][rank]' => '1',
+            'attachedFiles[0][annexes][0][name]' => 'Annexe 1',
+            'attachedFiles[0][annexes][0][rank]' => '1',
+            'attachedFiles[0][annexes][1][name]' => 'Annexe 2',
+            'attachedFiles[0][annexes][1][rank]' => '2',
+        ] as $field => $value) {
+            $this->assertStringContainsString("name=\"{$field}\"\r\n\r\n{$value}\r\n", $body);
+        }
+        $this->assertStringContainsString('name="attachedFiles[0][uploadedfile]"; filename="test.pdf"', $body);
+        $this->assertStringContainsString('name="attachedFiles[0][annexes][1][uploadedfile]"; filename="test.pdf"', $body);
+    }
+
+    public function testCreateDossierNetworkErrorThrowsComelusException(): void
+    {
+        $comelusWrapper = $this->createWrapper($this->failingClient());
+
+        $this->expectException(ComelusException::class);
+        $this->expectExceptionMessage('Could not resolve host');
+        $this->expectExceptionCode(6);
+
+        $comelusWrapper->createDossier($this->createDossierWithOneFile());
+    }
+
+    public function testCreateDossierErrorResponseUsesMessageFromJsonBody(): void
+    {
+        $response = $this->createResponse(400, '{"message":"mailingList not found"}', 'Bad Request');
+        $comelusWrapper = $this->createWrapper($this->stubClient($response));
+
+        $this->expectException(ComelusException::class);
+        $this->expectExceptionMessage('mailingList not found');
+        $this->expectExceptionCode(400);
+
+        $comelusWrapper->createDossier($this->createDossierWithOneFile());
     }
 }
