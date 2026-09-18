@@ -1,13 +1,19 @@
 {
     "name": "libriciel/comelus-api-wrapper",
+    "description": "Wrapper PHP de l'API Comélus : Vérification de la connexion, listes de diffusion, création et envoi des dossiers",
     "license": "AGPL-3.0-or-later",
-    "version": "3.0.0",
     "authors": [
         {
             "name": "Théo GUILLON",
             "email": "theo.guillon@libriciel.coop",
             "homepage": "https://www.libriciel.fr/comelus/",
             "role": "Project Manager"
+        },
+        {
+            "name": "Antonin RABATEL",
+            "email": "arabatel@libriciel.coop",
+            "homepage": "https://www.libriciel.fr/comelus/",
+            "role": "Maintainer"
         }
     ],
     "require": {
@@ -22,8 +28,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Libriciel\\ComelusApiWrapper\\": "src/",
-            "Libriciel\\ComelusApiWrapper\\Test\\": "tests/"
+            "Libriciel\\ComelusApiWrapper\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Libriciel\\ComelusApiWrapper\\": "tests/"
         }
     },
     "config": {
