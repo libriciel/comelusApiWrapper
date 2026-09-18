@@ -759,4 +759,48 @@ final class ComelusWrapperTest extends TestCase
 
         $comelusWrapper->createDossier($this->createDossierWithOneFile());
     }
+
+    public function testCheckEmptyResponseThrowsComelusException(): void
+    {
+        $comelusWrapper = $this->createWrapper($this->stubClient($this->createResponse(200, '')));
+
+        $this->expectException(ComelusException::class);
+        $this->expectExceptionMessage('invalid response : Syntax error');
+        $this->expectExceptionCode(500);
+
+        $comelusWrapper->check();
+    }
+
+    public function testGetMailingListsHtmlResponseThrowsComelusException(): void
+    {
+        $comelusWrapper = $this->createWrapper($this->stubClient($this->createResponse(200, '<html>Maintenance</html>')));
+
+        $this->expectException(ComelusException::class);
+        $this->expectExceptionMessage('invalid response : Syntax error');
+        $this->expectExceptionCode(500);
+
+        $comelusWrapper->getMailingLists();
+    }
+
+    public function testCheckNonArrayJsonResponseThrowsComelusException(): void
+    {
+        $comelusWrapper = $this->createWrapper($this->stubClient($this->createResponse(200, '"ok"')));
+
+        $this->expectException(ComelusException::class);
+        $this->expectExceptionMessage('invalid response : JSON object expected');
+        $this->expectExceptionCode(500);
+
+        $comelusWrapper->check();
+    }
+
+    public function testCreateDossierEmptyResponseThrowsComelusException(): void
+    {
+        $comelusWrapper = $this->createWrapper($this->stubClient($this->createResponse(201, '')));
+
+        $this->expectException(ComelusException::class);
+        $this->expectExceptionMessage('invalid response : Syntax error');
+        $this->expectExceptionCode(500);
+
+        $comelusWrapper->createDossier($this->createDossierWithOneFile());
+    }
 }

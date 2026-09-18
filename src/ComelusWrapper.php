@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace Libriciel\ComelusApiWrapper;
 
 use Http\Message\MultipartStream\MultipartStreamBuilder;
+use JsonException;
 use Libriciel\ComelusApiWrapper\Model\Annexe;
 use Libriciel\ComelusApiWrapper\Model\Dossier;
 use Libriciel\ComelusApiWrapper\Model\File;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
+use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -108,7 +110,10 @@ class ComelusWrapper
         return $this->sendRequest(self::BASE_ROUTE_PATH . "/dossier/$dossierId/status");
     }
 
-    public function createDossier(Dossier $dossier)
+    /**
+     * @throws ComelusException
+     */
+    public function createDossier(Dossier $dossier): array
     {
         $this->isInit();
 
@@ -123,20 +128,7 @@ class ComelusWrapper
             ->withBody($builder->build())
         ;
 
-        try {
-            $response = $this->client->sendRequest($request);
-        } catch (ClientExceptionInterface $e) {
-            throw new ComelusException($e->getMessage(), $e->getCode());
-        }
-
-        if ($response->getStatusCode() != Response::HTTP_CREATED) {
-            $content = json_decode($response->getBody()->getContents(), true);
-            $message = $content['message'] ?? $response->getReasonPhrase();
-
-            throw new ComelusException($message, $response->getStatusCode());
-        }
-
-        return json_decode($response->getBody()->getContents(), true);
+        return $this->send($request, Response::HTTP_CREATED);
     }
 
     private function prepareMultipart(Dossier $dossier): MultipartStreamBuilder
@@ -198,19 +190,39 @@ class ComelusWrapper
             "$this->url" . $path
         )->withHeader('Authorization', 'Bearer ' . $this->apiKey);
 
+        return $this->send($request, Response::HTTP_OK);
+    }
+
+    /**
+     * @throws ComelusException
+     */
+    private function send(RequestInterface $request, int $expectedStatusCode): array
+    {
         try {
             $response = $this->client->sendRequest($request);
         } catch (ClientExceptionInterface $e) {
-            throw new ComelusException($e->getMessage(), $e->getCode());
+            throw new ComelusException($e->getMessage(), $e->getCode(), $e);
         }
 
-        if ($response->getStatusCode() != Response::HTTP_OK) {
-            $content = json_decode($response->getBody()->getContents(), true);
+        $body = $response->getBody()->getContents();
+
+        if ($response->getStatusCode() !== $expectedStatusCode) {
+            $content = json_decode($body, true);
             $message = $content['message'] ?? $response->getReasonPhrase();
 
             throw new ComelusException($message, $response->getStatusCode());
         }
 
-        return json_decode($response->getBody()->getContents(), true);
+        try {
+            $data = json_decode($body, true, flags: JSON_THROW_ON_ERROR);
+        } catch (JsonException $e) {
+            throw new ComelusException('invalid response : ' . $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR, $e);
+        }
+
+        if (!is_array($data)) {
+            throw new ComelusException('invalid response : JSON object expected', Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+        return $data;
     }
 }

@@ -7,6 +7,10 @@ All notable changes to this project will be documented in this file.
 
 ### Modifications
 
+### Corrections
+- Réponse de l'API vide ou non JSON : `ComelusException` (code 500) au lieu d'une `TypeError` (`check()`,
+`getMailingLists()`…) ou d'un `null` renvoyé sans erreur (`createDossier()`)
+
 ### Suppressions
 
 ## [3.0.0] - 2025-09-19
