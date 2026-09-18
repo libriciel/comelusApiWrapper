@@ -141,6 +141,17 @@ final class ComelusWrapperTest extends TestCase
         $comelusWrapper->setApiKey('my apiKey');
     }
 
+    public function testSetApiKeyWithTrailingNewlineThrowsException(): void
+    {
+        $comelusWrapper = new ComelusWrapper($this->createStub(ClientInterface::class), new Psr17Factory(), new Psr17Factory());
+
+        $this->expectException(ComelusException::class);
+        $this->expectExceptionMessage('malformed apiKey : no whitespace allowed');
+        $this->expectExceptionCode(Response::HTTP_BAD_REQUEST);
+
+        $comelusWrapper->setApiKey("myapiKey\n");
+    }
+
     public function testCheckWrongApiKey()
     {
         $requestFactory = new Psr17Factory();

@@ -50,7 +50,7 @@ class ComelusWrapper
      */
     public function setApiKey(string $apiKey): void
     {
-        $noWhitespace = "~^^\S+$~";
+        $noWhitespace = '~^\S+\z~';
 
         if (!preg_match($noWhitespace, $apiKey)) {
             throw new ComelusException('malformed apiKey : no whitespace allowed', Response::HTTP_BAD_REQUEST);
