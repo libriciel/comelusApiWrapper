@@ -1,7 +1,7 @@
 DOCKER_COMPOSE = docker compose
 RUN = $(DOCKER_COMPOSE) run --rm php
 
-.PHONY: build shell composer-install composer-update test ecs ecs-fix
+.PHONY: build shell composer-install composer-update test ecs ecs-fix phpstan
 
 build:
 	$(DOCKER_COMPOSE) build --build-arg UID=$$(id -u) --build-arg GID=$$(id -g)
@@ -23,3 +23,6 @@ ecs:
 
 ecs-fix:
 	$(RUN) vendor/bin/ecs --fix
+
+phpstan:
+	$(RUN) vendor/bin/phpstan analyse
