@@ -99,7 +99,7 @@ final class ComelusWrapperTest extends TestCase
         $this->expectNotToPerformAssertions();
 
         $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
-        $comelusWrapper->setUrl('http://testurl.fr');
+        $comelusWrapper->setUrl('https://testurl.fr');
     }
 
     public function testSetUrlMalformed()
@@ -109,7 +109,7 @@ final class ComelusWrapperTest extends TestCase
         $streamFactory = new Psr17Factory();
 
         $this->expectException(ComelusException::class);
-        $this->expectExceptionMessage('malformed url : missing http|https');
+        $this->expectExceptionMessage('malformed url : https required');
         $this->expectExceptionCode(Response::HTTP_BAD_REQUEST);
         $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
         $comelusWrapper->setUrl('testurl.fr');
@@ -141,12 +141,23 @@ final class ComelusWrapperTest extends TestCase
         $comelusWrapper->setApiKey('my apiKey');
     }
 
+    public function testSetUrlWithHttpThrowsException(): void
+    {
+        $comelusWrapper = new ComelusWrapper($this->createStub(ClientInterface::class), new Psr17Factory(), new Psr17Factory());
+
+        $this->expectException(ComelusException::class);
+        $this->expectExceptionMessage('malformed url : https required');
+        $this->expectExceptionCode(Response::HTTP_BAD_REQUEST);
+
+        $comelusWrapper->setUrl('http://comelus.fr');
+    }
+
     public function testSetUrlWithTrailingNewlineThrowsException(): void
     {
         $comelusWrapper = new ComelusWrapper($this->createStub(ClientInterface::class), new Psr17Factory(), new Psr17Factory());
 
         $this->expectException(ComelusException::class);
-        $this->expectExceptionMessage('malformed url : missing http|https');
+        $this->expectExceptionMessage('malformed url : https required');
         $this->expectExceptionCode(Response::HTTP_BAD_REQUEST);
 
         $comelusWrapper->setUrl("https://comelus.fr\n");
@@ -170,7 +181,7 @@ final class ComelusWrapperTest extends TestCase
         $comelusWrapper = new ComelusWrapper($this->createStub(ClientInterface::class), new Psr17Factory(), new Psr17Factory());
 
         $this->expectException(ComelusException::class);
-        $this->expectExceptionMessage('malformed url : missing http|https');
+        $this->expectExceptionMessage('malformed url : https required');
         $this->expectExceptionCode(Response::HTTP_BAD_REQUEST);
 
         $comelusWrapper->setUrl('https:///');

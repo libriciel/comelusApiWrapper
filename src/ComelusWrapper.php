@@ -31,7 +31,7 @@ class ComelusWrapper
     }
 
     /**
-     * @param string $url comelus main url with http|s
+     * @param string $url comelus main url, https only
      *
      * @throws ComelusException
      */
@@ -39,9 +39,9 @@ class ComelusWrapper
     {
         $url = rtrim($url, '/');
 
-        $httpRegex = '~^https?://.+\z~';
+        $httpRegex = '~^https://.+\z~';
         if (!preg_match($httpRegex, $url)) {
-            throw new ComelusException('malformed url : missing http|https', Response::HTTP_BAD_REQUEST);
+            throw new ComelusException('malformed url : https required', Response::HTTP_BAD_REQUEST);
         }
         $this->url = $url;
     }
