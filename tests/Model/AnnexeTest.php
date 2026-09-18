@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Libriciel\ComelusApiWrapper\Test\Model;
 
 use Libriciel\ComelusApiWrapper\ComelusException;
@@ -7,7 +9,7 @@ use Libriciel\ComelusApiWrapper\Model\Annexe;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
-class AnnexeTest extends TestCase
+final class AnnexeTest extends TestCase
 {
     public function testCreateValidAnnexe(): void
     {

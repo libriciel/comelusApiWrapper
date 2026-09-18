@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Libriciel\ComelusApiWrapper\Test\Model;
 
 use Libriciel\ComelusApiWrapper\ComelusException;
@@ -8,7 +10,7 @@ use Libriciel\ComelusApiWrapper\Model\ValidatorDossierTrait;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Uid\Uuid;
 
-class ValidatorDossierTraitTest extends TestCase
+final class ValidatorDossierTraitTest extends TestCase
 {
     private function makeValidator(): object
     {

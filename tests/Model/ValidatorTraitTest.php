@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Libriciel\ComelusApiWrapper\Test\Model;
 
 use Libriciel\ComelusApiWrapper\ComelusException;
@@ -8,7 +10,7 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Uid\Uuid;
 
-class ValidatorTraitTest extends TestCase
+final class ValidatorTraitTest extends TestCase
 {
     private function makeValidator(): object
     {

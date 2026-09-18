@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Libriciel\ComelusApiWrapper\Model;
 
 use Symfony\Component\HttpFoundation\File\UploadedFile;

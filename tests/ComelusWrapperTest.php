@@ -1,5 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
+namespace Libriciel\ComelusApiWrapper\Test;
+
 use Libriciel\ComelusApiWrapper\ComelusException;
 use Libriciel\ComelusApiWrapper\ComelusWrapper;
 use Libriciel\ComelusApiWrapper\Model\Dossier;
@@ -12,7 +16,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Uid\Uuid;
 
-class ComelusWrapperTest extends TestCase
+final class ComelusWrapperTest extends TestCase
 {
     private function createResponse(int $statusCode, string $body, string $reasonPhrase = ''): ResponseInterface
     {

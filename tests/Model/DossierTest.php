@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Libriciel\ComelusApiWrapper\Test\Model;
 
 use Libriciel\ComelusApiWrapper\ComelusException;
@@ -9,7 +11,7 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Uid\Uuid;
 
-class DossierTest extends TestCase
+final class DossierTest extends TestCase
 {
     // Test pour un dossier valide
     public function testCreateValidDossier(): void

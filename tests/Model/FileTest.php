@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Libriciel\ComelusApiWrapper\Test\Model;
 
 use Libriciel\ComelusApiWrapper\ComelusException;
@@ -8,7 +10,7 @@ use Libriciel\ComelusApiWrapper\Model\File;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
-class FileTest extends TestCase
+final class FileTest extends TestCase
 {
     // Test pour un fichier valide sans annexe
     public function testCreateValidFileWithoutAnnexe(): void

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Libriciel\ComelusApiWrapper;
 
 use Http\Message\MultipartStream\MultipartStreamBuilder;
