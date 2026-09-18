@@ -19,9 +19,10 @@ class ValidatorTraitTest extends TestCase
 
     public function testValidateStringWithNonEmptyValuePasses(): void
     {
+        $this->expectNotToPerformAssertions();
+
         $validator = $this->makeValidator();
         $validator->validateString('Hello', 'test field');
-        $this->assertTrue(true); // No exception thrown
     }
 
     public function testValidateStringWithWhitespaceOnlyThrowsException(): void
@@ -34,10 +35,11 @@ class ValidatorTraitTest extends TestCase
 
     public function testValidateLengthWithinLimitPasses(): void
     {
+        $this->expectNotToPerformAssertions();
+
         $validator = $this->makeValidator();
         $value = str_repeat('a', 10);
         $validator->validateLength($value, 10, 'field');
-        $this->assertTrue(true);
     }
 
     public function testValidateLengthExceedingLimitThrowsException(): void
@@ -50,10 +52,11 @@ class ValidatorTraitTest extends TestCase
 
     public function testValidatePositiveIntWithZeroAndPositivePasses(): void
     {
+        $this->expectNotToPerformAssertions();
+
         $validator = $this->makeValidator();
         $validator->validatePositiveInt(0, 'rank');
         $validator->validatePositiveInt(42, 'rank');
-        $this->assertTrue(true);
     }
 
     public function testValidatePositiveIntWithNegativeThrowsException(): void
@@ -66,13 +69,14 @@ class ValidatorTraitTest extends TestCase
 
     public function testValidateUploadedFileWithValidFilePasses(): void
     {
+        $this->expectNotToPerformAssertions();
+
         $validator = $this->makeValidator();
         $uploadedFile = new UploadedFile(
             __DIR__ . '/../resources/test.pdf',
             'test.pdf'
         );
         $validator->validateUploadedFile($uploadedFile, 'file uploadedfile is not a valid uploaded file');
-        $this->assertTrue(true);
     }
 
     public function testIsValidUuidReturnsTrueForValidUuid(): void

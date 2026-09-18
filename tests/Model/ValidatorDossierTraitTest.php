@@ -19,17 +19,19 @@ class ValidatorDossierTraitTest extends TestCase
 
     public function testValidateDossierNameWithValidValuePasses(): void
     {
+        $this->expectNotToPerformAssertions();
+
         $validator = $this->makeValidator();
         $validator->validateDossierName('Projet Alpha');
-        $this->assertTrue(true);
     }
 
     public function testValidateDossierNameLength(): void
     {
+        $this->expectNotToPerformAssertions();
+
         $validator = $this->makeValidator();
         $long = str_repeat('a', Dossier::MAX_LENGTH_DOSSIER_NAME);
         $validator->validateDossierName($long);
-        $this->assertTrue(true);
     }
 
     public function testValidateDossierNameWithEmptyStringThrowsException(): void
@@ -59,10 +61,11 @@ class ValidatorDossierTraitTest extends TestCase
 
     public function testValidateMailingListIdWithValidUuidPasses(): void
     {
+        $this->expectNotToPerformAssertions();
+
         $validator = $this->makeValidator();
         $uuid = Uuid::v7()->toRfc4122();
         $validator->validateMailingListId($uuid);
-        $this->assertTrue(true);
     }
 
     public function testValidateMailingListIdWithEmptyStringThrowsException(): void

@@ -5,83 +5,48 @@ use Libriciel\ComelusApiWrapper\ComelusWrapper;
 use Libriciel\ComelusApiWrapper\Model\Dossier;
 use Libriciel\ComelusApiWrapper\Model\File;
 use Nyholm\Psr7\Factory\Psr17Factory;
-use Nyholm\Psr7\Stream;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Client\ClientInterface;
-use Psr\Http\Message\RequestFactoryInterface;
-use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\StreamFactoryInterface;
-use Psr\Http\Message\StreamInterface;
-use Psr\Http\Message\UploadedFileInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Uid\Uuid;
 
 class ComelusWrapperTest extends TestCase
 {
-    private function mockResponse(int $statusCode, ?string $reasonPhrase = "", ?StreamInterface $body = null): ResponseInterface
+    private function createResponse(int $statusCode, string $body, string $reasonPhrase = ''): ResponseInterface
     {
-        $response = $this->createMock(ResponseInterface::class);
-        $response->method('getStatusCode')->willReturn($statusCode);
-        $response->method('getReasonPhrase')->willReturn($reasonPhrase);
-        $response->method('getBody')->willReturn($body);
+        $factory = new Psr17Factory();
 
-        return $response;
+        return $factory->createResponse($statusCode, $reasonPhrase)
+            ->withBody($factory->createStream($body));
     }
 
-    private function mockBody(string $json): StreamInterface
+    private function stubClient(ResponseInterface $response): ClientInterface
     {
-        $stream = $this->createMock(StreamInterface::class);
-        $stream->method('getContents')->willReturn($json);
-
-        return $stream;
-    }
-
-    private function mockRequestFactory(): RequestFactoryInterface
-    {
-        $request = $this->createMock(RequestInterface::class);
-        $request->method('withHeader')->willReturnSelf();
-        $request->method('withAddedHeader')->willReturnSelf();
-        $request->method('withBody')->willReturnSelf();
-
-        $request->method('getBody')->willReturn($this->createMock(StreamInterface::class));
-
-        $factory = $this->createMock(RequestFactoryInterface::class);
-        $factory->method('createRequest')->willReturn($request);
-
-        return $factory;
-    }
-
-    private function mockClient(?ResponseInterface $response, Exception $exception = null): ClientInterface
-    {
-        $client = $this->createMock(ClientInterface::class);
-        if (!$exception) {
-            $client->method('sendRequest')->willReturn($response);
-        } else {
-            $client->method('sendRequest')->willThrowException($exception);
-        }
+        $client = $this->createStub(ClientInterface::class);
+        $client->method('sendRequest')->willReturn($response);
 
         return $client;
     }
 
     public function testSetUrl()
     {
-        $client = $this->createMock(ClientInterface::class);
-        $requestFactory = $this->createMock(RequestFactoryInterface::class);
-        $streamFactory = $this->createMock(StreamFactoryInterface::class);
+        $client = $this->createStub(ClientInterface::class);
+        $requestFactory = new Psr17Factory();
+        $streamFactory = new Psr17Factory();
+
+        $this->expectNotToPerformAssertions();
 
         $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
         $comelusWrapper->setUrl("http://testurl.fr");
-
-        $this->assertTrue(true);
     }
 
     public function testSetUrlMalformed()
     {
-        $client = $this->createMock(ClientInterface::class);
-        $requestFactory = $this->createMock(RequestFactoryInterface::class);
-        $streamFactory = $this->createMock(StreamFactoryInterface::class);
+        $client = $this->createStub(ClientInterface::class);
+        $requestFactory = new Psr17Factory();
+        $streamFactory = new Psr17Factory();
 
         $this->expectException(ComelusException::class);
         $this->expectExceptionMessage("malformed url : missing http|https");
@@ -92,21 +57,21 @@ class ComelusWrapperTest extends TestCase
 
     public function testSetApiKey()
     {
-        $client = $this->createMock(ClientInterface::class);
-        $requestFactory = $this->createMock(RequestFactoryInterface::class);
-        $streamFactory = $this->createMock(StreamFactoryInterface::class);
+        $client = $this->createStub(ClientInterface::class);
+        $requestFactory = new Psr17Factory();
+        $streamFactory = new Psr17Factory();
+
+        $this->expectNotToPerformAssertions();
 
         $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
         $comelusWrapper->setApiKey("myapiKey");
-
-        $this->assertTrue(true);
     }
 
     public function testSetApiKeyMalformed()
     {
-        $client = $this->createMock(ClientInterface::class);
-        $requestFactory = $this->createMock(RequestFactoryInterface::class);
-        $streamFactory = $this->createMock(StreamFactoryInterface::class);
+        $client = $this->createStub(ClientInterface::class);
+        $requestFactory = new Psr17Factory();
+        $streamFactory = new Psr17Factory();
 
         $this->expectException(ComelusException::class);
         $this->expectExceptionMessage("malformed apiKey : no whitespace allowed");
@@ -118,14 +83,11 @@ class ComelusWrapperTest extends TestCase
 
     public function testCheckWrongApiKey()
     {
-        $requestFactory = $this->mockRequestFactory();
-
+        $requestFactory = new Psr17Factory();
         $streamFactory = new Psr17Factory();
-        $stream = $streamFactory->createStream('bad apKey');
-        $response = $this->mockResponse(401, $stream->getContents(), $stream);
 
-        $client = $this->mockClient($response);
-        $streamFactory = $this->createMock(StreamFactoryInterface::class);
+        $response = $this->createResponse(401, 'bad apKey', 'bad apKey');
+        $client = $this->stubClient($response);
 
         $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
         $comelusWrapper->setUrl('https://test.libriciel.fr');
@@ -140,10 +102,10 @@ class ComelusWrapperTest extends TestCase
 
     public function testCheck()
     {
-        $response = $this->mockResponse(200, '', $this->mockBody('{"success":true}'));
-        $client = $this->mockClient($response);
-        $requestFactory = $this->mockRequestFactory();
-        $streamFactory = $this->createMock(StreamFactoryInterface::class);
+        $response = $this->createResponse(200, '{"success":true}');
+        $client = $this->stubClient($response);
+        $requestFactory = new Psr17Factory();
+        $streamFactory = new Psr17Factory();
 
         $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
         $comelusWrapper->setApiKey("myapiKey");
@@ -155,9 +117,9 @@ class ComelusWrapperTest extends TestCase
 
     public function testCheckMissingUrlAndApiKey()
     {
-        $client = $this->createMock(ClientInterface::class);
-        $requestFactory = $this->mockRequestFactory();
-        $streamFactory = $this->createMock(StreamFactoryInterface::class);
+        $client = $this->createStub(ClientInterface::class);
+        $requestFactory = new Psr17Factory();
+        $streamFactory = new Psr17Factory();
 
         $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
 
@@ -170,9 +132,9 @@ class ComelusWrapperTest extends TestCase
 
     public function testCheckMissingApiKey()
     {
-        $client = $this->createMock(ClientInterface::class);
-        $requestFactory = $this->mockRequestFactory();
-        $streamFactory = $this->createMock(StreamFactoryInterface::class);
+        $client = $this->createStub(ClientInterface::class);
+        $requestFactory = new Psr17Factory();
+        $streamFactory = new Psr17Factory();
 
         $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
         $comelusWrapper->setUrl("https://comelus.fr");
@@ -186,9 +148,9 @@ class ComelusWrapperTest extends TestCase
 
     public function testCheckMissingUrl()
     {
-        $client = $this->createMock(ClientInterface::class);
-        $requestFactory = $this->mockRequestFactory();
-        $streamFactory = $this->createMock(StreamFactoryInterface::class);
+        $client = $this->createStub(ClientInterface::class);
+        $requestFactory = new Psr17Factory();
+        $streamFactory = new Psr17Factory();
 
         $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
         $comelusWrapper->setApiKey("myapiKey");
@@ -203,10 +165,10 @@ class ComelusWrapperTest extends TestCase
     public function testGetMailingLists()
     {
         $jsonResponse = '[{"id":"dc85a85e-0cfe-47f0-9019-ab104b04a6eb", "name":"myMailingList"}]';
-        $response = $this->mockResponse(200, '', $this->mockBody($jsonResponse));
-        $client = $this->mockClient($response);
-        $requestFactory = $this->mockRequestFactory();
-        $streamFactory = $this->createMock(StreamFactoryInterface::class);
+        $response = $this->createResponse(200, $jsonResponse);
+        $client = $this->stubClient($response);
+        $requestFactory = new Psr17Factory();
+        $streamFactory = new Psr17Factory();
 
         $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
         $comelusWrapper->setApiKey("myapiKey");
@@ -234,10 +196,10 @@ class ComelusWrapperTest extends TestCase
             ]
         ];
 
-        $response = $this->mockResponse(200, '', $this->mockBody(json_encode($expected)));
-        $client = $this->mockClient($response);
-        $requestFactory = $this->mockRequestFactory();
-        $streamFactory = $this->createMock(StreamFactoryInterface::class);
+        $response = $this->createResponse(200, json_encode($expected));
+        $client = $this->stubClient($response);
+        $requestFactory = new Psr17Factory();
+        $streamFactory = new Psr17Factory();
 
         $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
         $comelusWrapper->setApiKey("myapiKey");
@@ -261,10 +223,10 @@ class ComelusWrapperTest extends TestCase
             ]
         ];
 
-        $response = $this->mockResponse(200, '', $this->mockBody(json_encode($expected)));
-        $client = $this->mockClient($response);
-        $requestFactory = $this->mockRequestFactory();
-        $streamFactory = $this->createMock(StreamFactoryInterface::class);
+        $response = $this->createResponse(200, json_encode($expected));
+        $client = $this->stubClient($response);
+        $requestFactory = new Psr17Factory();
+        $streamFactory = new Psr17Factory();
 
         $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
         $comelusWrapper->setApiKey("myapiKey");
@@ -277,10 +239,10 @@ class ComelusWrapperTest extends TestCase
 
     public function testSendDocument()
     {
-        $response = $this->mockResponse(200, '', $this->mockBody('{"success":true}'));
-        $client = $this->mockClient($response);
-        $requestFactory = $this->mockRequestFactory();
-        $streamFactory = $this->createMock(StreamFactoryInterface::class);
+        $response = $this->createResponse(200, '{"success":true}');
+        $client = $this->stubClient($response);
+        $requestFactory = new Psr17Factory();
+        $streamFactory = new Psr17Factory();
 
         $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
         $comelusWrapper->setApiKey("myapiKey");
@@ -298,20 +260,14 @@ class ComelusWrapperTest extends TestCase
             "id" => "da781241-3c2c-420c-90f8-f2f83df99c74"
         ];
 
-        $response = $this->mockResponse(201, '', $this->mockBody(json_encode($expected)));
-        $client = $this->mockClient($response);
-        $requestFactory = $this->mockRequestFactory();
-        $streamFactory = $this->createMock(StreamFactoryInterface::class);
+        $response = $this->createResponse(201, json_encode($expected));
+        $client = $this->stubClient($response);
+        $requestFactory = new Psr17Factory();
+        $streamFactory = new Psr17Factory();
 
         $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
         $comelusWrapper->setApiKey("myapiKey");
         $comelusWrapper->setUrl("https://comelus.fr");
-
-        $file = $this->createMock(UploadedFileInterface::class);
-
-        $file->method('getStream')->willReturn(Stream::create("my stream"));
-        $file->method('getClientFilename')->willReturn("deliberation.pdf");
-        $file->method('getClientMediaType')->willReturn("application/pdf");
 
         $uploadedFile = new UploadedFile(
             __DIR__ . '/resources/test.pdf',
@@ -338,20 +294,14 @@ class ComelusWrapperTest extends TestCase
             "id" => "da781241-3c2c-420c-90f8-f2f83df99c74"
         ];
 
-        $response = $this->mockResponse(201, '', $this->mockBody(json_encode($expected)));
-        $client = $this->mockClient($response);
-        $requestFactory = $this->mockRequestFactory();
-        $streamFactory = $this->createMock(StreamFactoryInterface::class);
+        $response = $this->createResponse(201, json_encode($expected));
+        $client = $this->stubClient($response);
+        $requestFactory = new Psr17Factory();
+        $streamFactory = new Psr17Factory();
 
         $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
         $comelusWrapper->setApiKey("myapiKey");
         $comelusWrapper->setUrl("https://comelus.fr");
-
-        $file = $this->createMock(UploadedFileInterface::class);
-
-        $file->method('getStream')->willReturn(Stream::create("my stream"));
-        $file->method('getClientFilename')->willReturn("deliberation.pdf");
-        $file->method('getClientMediaType')->willReturn("application/pdf");
 
         $uploadedFile = new UploadedFile(
             __DIR__ . '/resources/test.pdf',
@@ -378,20 +328,14 @@ class ComelusWrapperTest extends TestCase
             "id" => "da781241-3c2c-420c-90f8-f2f83df99c74"
         ];
 
-        $response = $this->mockResponse(201, '', $this->mockBody(json_encode($expected)));
-        $client = $this->mockClient($response);
-        $requestFactory = $this->mockRequestFactory();
-        $streamFactory = $this->createMock(StreamFactoryInterface::class);
+        $response = $this->createResponse(201, json_encode($expected));
+        $client = $this->stubClient($response);
+        $requestFactory = new Psr17Factory();
+        $streamFactory = new Psr17Factory();
 
         $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
         $comelusWrapper->setApiKey("myapiKey");
         $comelusWrapper->setUrl("https://comelus.fr");
-
-        $file = $this->createMock(UploadedFileInterface::class);
-
-        $file->method('getStream')->willReturn(Stream::create("my stream"));
-        $file->method('getClientFilename')->willReturn("deliberation.pdf");
-        $file->method('getClientMediaType')->willReturn("application/pdf");
 
         $uploadedFile = new UploadedFile(
             __DIR__ . '/resources/test.pdf',
@@ -418,20 +362,14 @@ class ComelusWrapperTest extends TestCase
             "id" => "da781241-3c2c-420c-90f8-f2f83df99c74"
         ];
 
-        $response = $this->mockResponse(201, '', $this->mockBody(json_encode($expected)));
-        $client = $this->mockClient($response);
-        $requestFactory = $this->mockRequestFactory();
-        $streamFactory = $this->createMock(StreamFactoryInterface::class);
+        $response = $this->createResponse(201, json_encode($expected));
+        $client = $this->stubClient($response);
+        $requestFactory = new Psr17Factory();
+        $streamFactory = new Psr17Factory();
 
         $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
         $comelusWrapper->setApiKey("myapiKey");
         $comelusWrapper->setUrl("https://comelus.fr");
-
-        $file = $this->createMock(UploadedFileInterface::class);
-
-        $file->method('getStream')->willReturn(Stream::create("my stream"));
-        $file->method('getClientFilename')->willReturn("deliberation.pdf");
-        $file->method('getClientMediaType')->willReturn("application/pdf");
 
         $uploadedFile = new UploadedFile(
             __DIR__ . '/resources/test.pdf',
@@ -458,20 +396,14 @@ class ComelusWrapperTest extends TestCase
             "id" => "da781241-3c2c-420c-90f8-f2f83df99c74"
         ];
 
-        $response = $this->mockResponse(201, '', $this->mockBody(json_encode($expected)));
-        $client = $this->mockClient($response);
-        $requestFactory = $this->mockRequestFactory();
-        $streamFactory = $this->createMock(StreamFactoryInterface::class);
+        $response = $this->createResponse(201, json_encode($expected));
+        $client = $this->stubClient($response);
+        $requestFactory = new Psr17Factory();
+        $streamFactory = new Psr17Factory();
 
         $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
         $comelusWrapper->setApiKey("myapiKey");
         $comelusWrapper->setUrl("https://comelus.fr");
-
-        $file = $this->createMock(UploadedFileInterface::class);
-
-        $file->method('getStream')->willReturn(Stream::create("my stream"));
-        $file->method('getClientFilename')->willReturn("deliberation.pdf");
-        $file->method('getClientMediaType')->willReturn("application/pdf");
 
         $uploadedFile = new UploadedFile(
             __DIR__ . '/resources/test.pdf',
@@ -498,20 +430,14 @@ class ComelusWrapperTest extends TestCase
             "id" => "da781241-3c2c-420c-90f8-f2f83df99c74"
         ];
 
-        $response = $this->mockResponse(201, '', $this->mockBody(json_encode($expected)));
-        $client = $this->mockClient($response);
-        $requestFactory = $this->mockRequestFactory();
-        $streamFactory = $this->createMock(StreamFactoryInterface::class);
+        $response = $this->createResponse(201, json_encode($expected));
+        $client = $this->stubClient($response);
+        $requestFactory = new Psr17Factory();
+        $streamFactory = new Psr17Factory();
 
         $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
         $comelusWrapper->setApiKey("myapiKey");
         $comelusWrapper->setUrl("https://comelus.fr");
-
-        $file = $this->createMock(UploadedFileInterface::class);
-
-        $file->method('getStream')->willReturn(Stream::create("my stream"));
-        $file->method('getClientFilename')->willReturn("deliberation.pdf");
-        $file->method('getClientMediaType')->willReturn("application/pdf");
 
         $uploadedFile = new UploadedFile(
             __DIR__ . '/resources/test.pdf',
@@ -532,9 +458,9 @@ class ComelusWrapperTest extends TestCase
     }
 
     public function testCreateDocumentMisingDossierName() {
-        $client = $this->createMock(ClientInterface::class);
-        $requestFactory = $this->mockRequestFactory();
-        $streamFactory = $this->createMock(StreamFactoryInterface::class);
+        $client = $this->createStub(ClientInterface::class);
+        $requestFactory = new Psr17Factory();
+        $streamFactory = new Psr17Factory();
 
         $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
         $comelusWrapper->setUrl("https://comelus.fr");
@@ -561,9 +487,9 @@ class ComelusWrapperTest extends TestCase
     }
 
     public function testCreateDocumentMisingDossierDescription() {
-        $client = $this->createMock(ClientInterface::class);
-        $requestFactory = $this->mockRequestFactory();
-        $streamFactory = $this->createMock(StreamFactoryInterface::class);
+        $client = $this->createStub(ClientInterface::class);
+        $requestFactory = new Psr17Factory();
+        $streamFactory = new Psr17Factory();
 
         $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
         $comelusWrapper->setUrl("https://comelus.fr");
@@ -590,9 +516,9 @@ class ComelusWrapperTest extends TestCase
     }
 
     public function testCreateDocumentMisingDossierMailingListId() {
-        $client = $this->createMock(ClientInterface::class);
-        $requestFactory = $this->mockRequestFactory();
-        $streamFactory = $this->createMock(StreamFactoryInterface::class);
+        $client = $this->createStub(ClientInterface::class);
+        $requestFactory = new Psr17Factory();
+        $streamFactory = new Psr17Factory();
 
         $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
         $comelusWrapper->setUrl("https://comelus.fr");
@@ -619,9 +545,9 @@ class ComelusWrapperTest extends TestCase
     }
 
     public function testCreateDocumentNotValidDossierMailingListId() {
-        $client = $this->createMock(ClientInterface::class);
-        $requestFactory = $this->mockRequestFactory();
-        $streamFactory = $this->createMock(StreamFactoryInterface::class);
+        $client = $this->createStub(ClientInterface::class);
+        $requestFactory = new Psr17Factory();
+        $streamFactory = new Psr17Factory();
 
         $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
         $comelusWrapper->setUrl("https://comelus.fr");
