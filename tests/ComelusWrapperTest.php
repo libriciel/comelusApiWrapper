@@ -141,6 +141,17 @@ final class ComelusWrapperTest extends TestCase
         $comelusWrapper->setApiKey('my apiKey');
     }
 
+    public function testSetUrlWithTrailingNewlineThrowsException(): void
+    {
+        $comelusWrapper = new ComelusWrapper($this->createStub(ClientInterface::class), new Psr17Factory(), new Psr17Factory());
+
+        $this->expectException(ComelusException::class);
+        $this->expectExceptionMessage('malformed url : missing http|https');
+        $this->expectExceptionCode(Response::HTTP_BAD_REQUEST);
+
+        $comelusWrapper->setUrl("https://comelus.fr\n");
+    }
+
     public function testSetApiKeyWithTrailingNewlineThrowsException(): void
     {
         $comelusWrapper = new ComelusWrapper($this->createStub(ClientInterface::class), new Psr17Factory(), new Psr17Factory());

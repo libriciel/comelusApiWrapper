@@ -37,7 +37,7 @@ class ComelusWrapper
      */
     public function setUrl(string $url): void
     {
-        $httpRegex = '~^((https?)://).+$~';
+        $httpRegex = '~^https?://.+\z~';
         if (!preg_match($httpRegex, $url)) {
             throw new ComelusException('malformed url : missing http|https', Response::HTTP_BAD_REQUEST);
         }
