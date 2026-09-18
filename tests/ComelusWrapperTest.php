@@ -896,4 +896,33 @@ final class ComelusWrapperTest extends TestCase
 
         $comelusWrapper->createDossier($this->createDossierWithOneFile());
     }
+
+    public function testCreateDossierWithoutOptionalFieldsSendsEmptyFields(): void
+    {
+        $uploadedFile = new UploadedFile(__DIR__ . '/resources/test.pdf', 'test.pdf');
+        $file = new File(null, null, null, $uploadedFile, []);
+        $file->addAnnexe(new Annexe(null, null, $uploadedFile));
+        $file->addAnnexe(new Annexe('', 2, $uploadedFile));
+        $dossier = new Dossier('myDocument', 'Nouveau document', '44edebc7-3299-4da1-94b2-0202245d78db', [$file]);
+
+        $response = $this->createResponse(201, '{"success":true,"id":"da781241-3c2c-420c-90f8-f2f83df99c74"}');
+        $comelusWrapper = $this->createWrapper($this->capturingClient($response));
+
+        $content = $comelusWrapper->createDossier($dossier);
+
+        $this->assertSame(['success' => true, 'id' => 'da781241-3c2c-420c-90f8-f2f83df99c74'], $content);
+        $this->assertNotNull($this->sentRequest);
+        $body = (string) $this->sentRequest->getBody();
+        foreach ([
+            'attachedFiles[0][category]' => '',
+            'attachedFiles[0][name]' => '',
+            'attachedFiles[0][rank]' => '',
+            'attachedFiles[0][annexes][0][name]' => '',
+            'attachedFiles[0][annexes][0][rank]' => '',
+            'attachedFiles[0][annexes][1][name]' => '',
+            'attachedFiles[0][annexes][1][rank]' => '2',
+        ] as $field => $value) {
+            $this->assertStringContainsString("name=\"{$field}\"\r\n\r\n{$value}\r\n", $body);
+        }
+    }
 }

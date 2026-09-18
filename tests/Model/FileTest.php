@@ -23,9 +23,9 @@ final class FileTest extends TestCase
         // Création d'un fichier sans annexe
         $file = new File('Facture', 'facture.pdf', 1, $uploadedFile, []);
 
-        $this->assertEquals('Facture', $file->getCategory());
-        $this->assertEquals('facture.pdf', $file->getName());
-        $this->assertEquals(1, $file->getRank());
+        $this->assertSame('Facture', $file->getCategory());
+        $this->assertSame('facture.pdf', $file->getName());
+        $this->assertSame(1, $file->getRank());
         $this->assertInstanceOf(UploadedFile::class, $file->getUploadedFile());
         $this->assertCount(0, $file->getAnnexes());  // Aucune annexe associée
     }
@@ -40,9 +40,9 @@ final class FileTest extends TestCase
         // Création d'un fichier sans annexe
         $file = new File('', 'facture.pdf', 1, $uploadedFile, []);
 
-        $this->assertEquals(null, $file->getCategory());
-        $this->assertEquals('facture.pdf', $file->getName());
-        $this->assertEquals(1, $file->getRank());
+        $this->assertSame('', $file->getCategory());
+        $this->assertSame('facture.pdf', $file->getName());
+        $this->assertSame(1, $file->getRank());
         $this->assertInstanceOf(UploadedFile::class, $file->getUploadedFile());
         $this->assertCount(0, $file->getAnnexes());  // Aucune annexe associée
     }
@@ -57,9 +57,9 @@ final class FileTest extends TestCase
         // Création d'un fichier sans annexe
         $file = new File(null, 'facture.pdf', 1, $uploadedFile, []);
 
-        $this->assertEquals(null, $file->getCategory());
-        $this->assertEquals('facture.pdf', $file->getName());
-        $this->assertEquals(1, $file->getRank());
+        $this->assertSame('', $file->getCategory());
+        $this->assertSame('facture.pdf', $file->getName());
+        $this->assertSame(1, $file->getRank());
         $this->assertInstanceOf(UploadedFile::class, $file->getUploadedFile());
         $this->assertCount(0, $file->getAnnexes());  // Aucune annexe associée
     }
@@ -74,9 +74,9 @@ final class FileTest extends TestCase
         // Création d'un fichier sans annexe
         $file = new File('Facture', '', 1, $uploadedFile, []);
 
-        $this->assertEquals('Facture', $file->getCategory());
-        $this->assertEquals(null, $file->getName());
-        $this->assertEquals(1, $file->getRank());
+        $this->assertSame('Facture', $file->getCategory());
+        $this->assertSame('', $file->getName());
+        $this->assertSame(1, $file->getRank());
         $this->assertInstanceOf(UploadedFile::class, $file->getUploadedFile());
         $this->assertCount(0, $file->getAnnexes());  // Aucune annexe associée
     }
@@ -91,9 +91,9 @@ final class FileTest extends TestCase
         // Création d'un fichier sans annexe
         $file = new File('Facture', null, 1, $uploadedFile, []);
 
-        $this->assertEquals('Facture', $file->getCategory());
-        $this->assertEquals(null, $file->getName());
-        $this->assertEquals(1, $file->getRank());
+        $this->assertSame('Facture', $file->getCategory());
+        $this->assertSame('', $file->getName());
+        $this->assertSame(1, $file->getRank());
         $this->assertInstanceOf(UploadedFile::class, $file->getUploadedFile());
         $this->assertCount(0, $file->getAnnexes());  // Aucune annexe associée
     }
@@ -108,9 +108,9 @@ final class FileTest extends TestCase
         // Création d'un fichier sans annexe
         $file = new File('Facture', 'facture.pdf', null, $uploadedFile, []);
 
-        $this->assertEquals('Facture', $file->getCategory());
-        $this->assertEquals('facture.pdf', $file->getName());
-        $this->assertEquals(null, $file->getRank());
+        $this->assertSame('Facture', $file->getCategory());
+        $this->assertSame('facture.pdf', $file->getName());
+        $this->assertNull($file->getRank());
         $this->assertInstanceOf(UploadedFile::class, $file->getUploadedFile());
         $this->assertCount(0, $file->getAnnexes());  // Aucune annexe associée
     }
@@ -125,9 +125,9 @@ final class FileTest extends TestCase
         // Création d'un fichier sans annexe
         $file = new File(null, null, null, $uploadedFile, []);
 
-        $this->assertEquals(null, $file->getCategory());
-        $this->assertEquals(null, $file->getName());
-        $this->assertEquals(null, $file->getRank());
+        $this->assertSame('', $file->getCategory());
+        $this->assertSame('', $file->getName());
+        $this->assertNull($file->getRank());
         $this->assertInstanceOf(UploadedFile::class, $file->getUploadedFile());
         $this->assertCount(0, $file->getAnnexes());  // Aucune annexe associée
     }
@@ -144,12 +144,12 @@ final class FileTest extends TestCase
         // Création d'un fichier avec une annexe
         $file = new File('Facture', 'facture.pdf', 1, $uploadedFile, [$annexe]);
 
-        $this->assertEquals('Facture', $file->getCategory());
-        $this->assertEquals('facture.pdf', $file->getName());
-        $this->assertEquals(1, $file->getRank());
+        $this->assertSame('Facture', $file->getCategory());
+        $this->assertSame('facture.pdf', $file->getName());
+        $this->assertSame(1, $file->getRank());
         $this->assertInstanceOf(UploadedFile::class, $file->getUploadedFile());
         $this->assertCount(1, $file->getAnnexes());  // Une annexe associée
-        $this->assertEquals('Annexe 1', $file->getAnnexes()[0]->getName());  // Vérification de l'annexe
+        $this->assertSame('Annexe 1', $file->getAnnexes()[0]->getName());  // Vérification de l'annexe
     }
 
     public function testCreateValidFileWithNameAnnexeIsEmpty(): void
@@ -163,13 +163,13 @@ final class FileTest extends TestCase
         // Création d'un fichier avec une annexe
         $file = new File('Facture', 'facture.pdf', 1, $uploadedFile, [$annexe]);
 
-        $this->assertEquals('Facture', $file->getCategory());
-        $this->assertEquals('facture.pdf', $file->getName());
-        $this->assertEquals(1, $file->getRank());
+        $this->assertSame('Facture', $file->getCategory());
+        $this->assertSame('facture.pdf', $file->getName());
+        $this->assertSame(1, $file->getRank());
         $this->assertInstanceOf(UploadedFile::class, $file->getUploadedFile());
         $this->assertCount(1, $file->getAnnexes());  // Une annexe associée
-        $this->assertEquals(null, $file->getAnnexes()[0]->getName());  // Vérification de l'annexe
-        $this->assertEquals(1, $file->getAnnexes()[0]->getRank());
+        $this->assertSame('', $file->getAnnexes()[0]->getName());  // Vérification de l'annexe
+        $this->assertSame(1, $file->getAnnexes()[0]->getRank());
     }
 
     public function testCreateValidFileWithNameAnnexeIsNull(): void
@@ -183,13 +183,13 @@ final class FileTest extends TestCase
         // Création d'un fichier avec une annexe
         $file = new File('Facture', 'facture.pdf', 1, $uploadedFile, [$annexe]);
 
-        $this->assertEquals('Facture', $file->getCategory());
-        $this->assertEquals('facture.pdf', $file->getName());
-        $this->assertEquals(1, $file->getRank());
+        $this->assertSame('Facture', $file->getCategory());
+        $this->assertSame('facture.pdf', $file->getName());
+        $this->assertSame(1, $file->getRank());
         $this->assertInstanceOf(UploadedFile::class, $file->getUploadedFile());
         $this->assertCount(1, $file->getAnnexes());  // Une annexe associée
-        $this->assertEquals(null, $file->getAnnexes()[0]->getName());  // Vérification de l'annexe
-        $this->assertEquals(1, $file->getAnnexes()[0]->getRank());
+        $this->assertSame('', $file->getAnnexes()[0]->getName());  // Vérification de l'annexe
+        $this->assertSame(1, $file->getAnnexes()[0]->getRank());
     }
 
     public function testCreateValidFileWithRankAnnexeIsNull(): void
@@ -203,13 +203,13 @@ final class FileTest extends TestCase
         // Création d'un fichier avec une annexe
         $file = new File('Facture', 'facture.pdf', 1, $uploadedFile, [$annexe]);
 
-        $this->assertEquals('Facture', $file->getCategory());
-        $this->assertEquals('facture.pdf', $file->getName());
-        $this->assertEquals(1, $file->getRank());
+        $this->assertSame('Facture', $file->getCategory());
+        $this->assertSame('facture.pdf', $file->getName());
+        $this->assertSame(1, $file->getRank());
         $this->assertInstanceOf(UploadedFile::class, $file->getUploadedFile());
         $this->assertCount(1, $file->getAnnexes());  // Une annexe associée
-        $this->assertEquals('Annexe 1', $file->getAnnexes()[0]->getName());  // Vérification de l'annexe
-        $this->assertEquals(null, $file->getAnnexes()[0]->getRank());
+        $this->assertSame('Annexe 1', $file->getAnnexes()[0]->getName());  // Vérification de l'annexe
+        $this->assertNull($file->getAnnexes()[0]->getRank());
     }
 
     public function testCreateFileWithEmptyCategory(): void
@@ -225,9 +225,9 @@ final class FileTest extends TestCase
             []
         );
 
-        $this->assertEquals('', $file->getCategory());
-        $this->assertEquals('test', $file->getName());
-        $this->assertEquals(1, $file->getRank());
+        $this->assertSame('', $file->getCategory());
+        $this->assertSame('test', $file->getName());
+        $this->assertSame(1, $file->getRank());
         $this->assertInstanceOf(UploadedFile::class, $file->getUploadedFile());
     }
 
@@ -244,9 +244,9 @@ final class FileTest extends TestCase
             []
         );
 
-        $this->assertEquals('', $file->getCategory());
-        $this->assertEquals('test', $file->getName());
-        $this->assertEquals(1, $file->getRank());
+        $this->assertSame('', $file->getCategory());
+        $this->assertSame('test', $file->getName());
+        $this->assertSame(1, $file->getRank());
         $this->assertInstanceOf(UploadedFile::class, $file->getUploadedFile());
     }
 
@@ -263,9 +263,9 @@ final class FileTest extends TestCase
             []
         );
 
-        $this->assertEquals('Facture', $file->getCategory());
-        $this->assertEquals('', $file->getName());
-        $this->assertEquals(1, $file->getRank());
+        $this->assertSame('Facture', $file->getCategory());
+        $this->assertSame('', $file->getName());
+        $this->assertSame(1, $file->getRank());
         $this->assertInstanceOf(UploadedFile::class, $file->getUploadedFile());
     }
 
@@ -282,10 +282,18 @@ final class FileTest extends TestCase
             []
         );
 
-        $this->assertEquals('Facture', $file->getCategory());
-        $this->assertEquals('', $file->getName());
-        $this->assertEquals(1, $file->getRank());
+        $this->assertSame('Facture', $file->getCategory());
+        $this->assertSame('', $file->getName());
+        $this->assertSame(1, $file->getRank());
         $this->assertInstanceOf(UploadedFile::class, $file->getUploadedFile());
+    }
+
+    public function testCreateFileWithBlankCategoryAndNameIsEmpty(): void
+    {
+        $file = new File('   ', "\t", 1, new UploadedFile(__DIR__ . '/../resources/test.pdf', 'test.pdf'));
+
+        $this->assertSame('', $file->getCategory());
+        $this->assertSame('', $file->getName());
     }
 
     public function testCreateFileWithNameToLongThrowsException(): void
@@ -355,7 +363,7 @@ final class FileTest extends TestCase
 
         $file = new File('Facture', 'facture.pdf', 0, $uploadedFile, []);
 
-        $this->assertEquals(0, $file->getRank());
+        $this->assertSame(0, $file->getRank());
         $this->assertInstanceOf(UploadedFile::class, $file->getUploadedFile());
     }
 
@@ -389,7 +397,7 @@ final class FileTest extends TestCase
         $file->addAnnexe($annexe2);
 
         $this->assertCount(2, $file->getAnnexes());
-        $this->assertEquals('Annexe 1', $file->getAnnexes()[0]->getName());
-        $this->assertEquals('Annexe 2', $file->getAnnexes()[1]->getName());
+        $this->assertSame('Annexe 1', $file->getAnnexes()[0]->getName());
+        $this->assertSame('Annexe 2', $file->getAnnexes()[1]->getName());
     }
 }

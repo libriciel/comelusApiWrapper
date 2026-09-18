@@ -10,20 +10,24 @@ class File
 {
     use ValidatorTrait;
 
+    private readonly string $category;
+    private readonly string $name;
+
     public function __construct(
-        private ?string $category,
-        private ?string $name,
+        ?string $category,
+        ?string $name,
         private readonly ?int $rank,
         private readonly UploadedFile $uploadedFile,
         private ?array $annexes = [],
     ) {
-        if (!empty($this->category)) {
-            $this->validateString($this->category, 'file category');
+        $this->category = $this->normalizeOptionalString($category);
+        $this->name = $this->normalizeOptionalString($name);
+
+        if ($this->category !== '') {
             $this->validateLength($this->category, 255, 'file category');
         }
 
-        if (!empty($this->name)) {
-            $this->validateString($this->name, 'file name');
+        if ($this->name !== '') {
             $this->validateLength($this->name, 512, 'file name');
         }
 
@@ -33,18 +37,15 @@ class File
 
         $this->validateUploadedFile($this->uploadedFile, 'file uploadedFile');
 
-        // Normalize optional fields: if null, convert to empty string; keep empty string as-is
-        $this->category = $this->category ?? '';
-        $this->name = $this->name ?? '';
         $this->annexes ??= [];
     }
 
-    public function getCategory(): ?string
+    public function getCategory(): string
     {
         return $this->category;
     }
 
-    public function getName(): ?string
+    public function getName(): string
     {
         return $this->name;
     }

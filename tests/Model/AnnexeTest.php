@@ -19,8 +19,8 @@ final class AnnexeTest extends TestCase
         );
         $annexe = new Annexe('Annexe 1', 1, $uploadedFile);
 
-        $this->assertEquals('Annexe 1', $annexe->getName());
-        $this->assertEquals(1, $annexe->getRank());
+        $this->assertSame('Annexe 1', $annexe->getName());
+        $this->assertSame(1, $annexe->getRank());
         $this->assertInstanceOf(UploadedFile::class, $annexe->getUploadedFile());
     }
 
@@ -35,8 +35,8 @@ final class AnnexeTest extends TestCase
             )
         );
 
-        $this->assertEquals('', $annexe->getName());
-        $this->assertEquals(1, $annexe->getRank());
+        $this->assertSame('', $annexe->getName());
+        $this->assertSame(1, $annexe->getRank());
         $this->assertInstanceOf(UploadedFile::class, $annexe->getUploadedFile());
     }
 
@@ -51,9 +51,23 @@ final class AnnexeTest extends TestCase
             )
         );
 
-        $this->assertEquals('', $annexe->getName());
-        $this->assertEquals(1, $annexe->getRank());
+        $this->assertSame('', $annexe->getName());
+        $this->assertSame(1, $annexe->getRank());
         $this->assertInstanceOf(UploadedFile::class, $annexe->getUploadedFile());
+    }
+
+    public function testCreateAnnexeWithBlankNameIsEmpty(): void
+    {
+        $annexe = new Annexe('   ', 1, new UploadedFile(__DIR__ . '/../resources/test.pdf', 'test.pdf'));
+
+        $this->assertSame('', $annexe->getName());
+    }
+
+    public function testCreateAnnexeNamedZero(): void
+    {
+        $annexe = new Annexe('0', 1, new UploadedFile(__DIR__ . '/../resources/test.pdf', 'test.pdf'));
+
+        $this->assertSame('0', $annexe->getName());
     }
 
     public function testCreateAnnexeWithNullRank(): void
@@ -67,8 +81,8 @@ final class AnnexeTest extends TestCase
             )
         );
 
-        $this->assertEquals('test', $annexe->getName());
-        $this->assertEquals(null, $annexe->getRank());
+        $this->assertSame('test', $annexe->getName());
+        $this->assertNull($annexe->getRank());
         $this->assertInstanceOf(UploadedFile::class, $annexe->getUploadedFile());
     }
 
@@ -82,7 +96,7 @@ final class AnnexeTest extends TestCase
 
         $annexe = new Annexe($maxName, 1, $uploadedFile);
 
-        $this->assertEquals($maxName, $annexe->getName());
+        $this->assertSame($maxName, $annexe->getName());
         $this->assertInstanceOf(UploadedFile::class, $annexe->getUploadedFile());
     }
 
@@ -127,7 +141,7 @@ final class AnnexeTest extends TestCase
 
         $annexe = new Annexe('Annexe 0', 0, $uploadedFile);
 
-        $this->assertEquals(0, $annexe->getRank());
+        $this->assertSame(0, $annexe->getRank());
         $this->assertInstanceOf(UploadedFile::class, $annexe->getUploadedFile());
     }
 

@@ -16,6 +16,14 @@ trait ValidatorTrait
         }
     }
 
+    /**
+     * Optional text field: null or blank means "not provided" and is sent to the API as an empty field.
+     */
+    public function normalizeOptionalString(?string $value): string
+    {
+        return $value === null || trim($value) === '' ? '' : $value;
+    }
+
     public function validateLength(string $value, int $maxLength, string $fieldName): void
     {
         if (strlen($value) > $maxLength) {
