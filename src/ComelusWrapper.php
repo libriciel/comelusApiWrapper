@@ -39,9 +39,9 @@ class ComelusWrapper
      */
     public function setUrl(string $url): void
     {
-        $httpRegex = "~^((https?)://).+$~";
+        $httpRegex = '~^((https?)://).+$~';
         if (!preg_match($httpRegex, $url)) {
-            throw new ComelusException("malformed url : missing http|https", Response::HTTP_BAD_REQUEST);
+            throw new ComelusException('malformed url : missing http|https', Response::HTTP_BAD_REQUEST);
         }
         $this->url = $url;
     }
@@ -55,7 +55,7 @@ class ComelusWrapper
         $noWhitespace = "~^^\S+$~";
 
         if (!preg_match($noWhitespace, $apiKey)) {
-            throw new ComelusException("malformed apiKey : no whitespace allowed", Response::HTTP_BAD_REQUEST);
+            throw new ComelusException('malformed apiKey : no whitespace allowed', Response::HTTP_BAD_REQUEST);
         }
         $this->apiKey = $apiKey;
     }
@@ -66,15 +66,15 @@ class ComelusWrapper
     private function isInit(): void
     {
         if (!$this->url && !$this->apiKey) {
-            throw new ComelusException("url and apiKey must be set", Response::HTTP_BAD_REQUEST);
+            throw new ComelusException('url and apiKey must be set', Response::HTTP_BAD_REQUEST);
         }
 
         if (!$this->url) {
-            throw new ComelusException("url must be set", Response::HTTP_BAD_REQUEST);
+            throw new ComelusException('url must be set', Response::HTTP_BAD_REQUEST);
         }
 
         if (!$this->apiKey) {
-            throw new ComelusException("apiKey must be set", Response::HTTP_BAD_REQUEST);
+            throw new ComelusException('apiKey must be set', Response::HTTP_BAD_REQUEST);
         }
     }
 
@@ -119,9 +119,9 @@ class ComelusWrapper
         $builder = $this->prepareMultipart($dossier);
 
         $request = $this->requestFactory->createRequest(
-                "POST",
-                "$this->url" . $this->baseRoutePath . '/dossier'
-            )
+            'POST',
+            "$this->url" . $this->baseRoutePath . '/dossier'
+        )
             ->withHeader('Content-Type', 'multipart/form-data; boundary="' . $builder->getBoundary() . '"')
             ->withAddedHeader('Authorization', 'Bearer ' . $this->apiKey)
             ->withBody($builder->build())
@@ -151,16 +151,17 @@ class ComelusWrapper
     {
         $builder = new MultipartStreamBuilder($this->streamFactory);
 
-        $builder->addResource("name", $dossier->getName());
-        $builder->addResource("description", $dossier->getDescription());
-        $builder->addResource("mailingListId", $dossier->getMailingListId());
+        $builder->addResource('name', $dossier->getName());
+        $builder->addResource('description', $dossier->getDescription());
+        $builder->addResource('mailingListId', $dossier->getMailingListId());
 
         /** @var File $file */
         foreach ($dossier->getAttachedFiles() as $key => $file) {
             $builder->addResource("attachedFiles[{$key}][category]", $file->getCategory());
             $builder->addResource("attachedFiles[{$key}][name]", $file->getName());
             $builder->addResource("attachedFiles[{$key}][rank]", strval($file->getRank()));
-            $builder->addResource("attachedFiles[{$key}][uploadedfile]",
+            $builder->addResource(
+                "attachedFiles[{$key}][uploadedfile]",
                 fopen($file->getUploadedFile()->getPathname(), 'r'),
                 [
                     'filename' => $file->getUploadedFile()->getClientOriginalName(),

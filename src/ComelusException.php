@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Libriciel\ComelusApiWrapper;
 
 use Exception;

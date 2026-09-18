@@ -309,7 +309,7 @@ class FileTest extends TestCase
     public function testCreateFileWithNegativeRankThrowsException(): void
     {
         $this->expectException(ComelusException::class);
-        $this->expectExceptionMessage("file rank must be a positive integer");
+        $this->expectExceptionMessage('file rank must be a positive integer');
 
         new File(
             'Facture',

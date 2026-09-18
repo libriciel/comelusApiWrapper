@@ -104,7 +104,7 @@ class AnnexeTest extends TestCase
     public function testCreateAnnexeWithNegativeRankThrowsException(): void
     {
         $this->expectException(ComelusException::class);
-        $this->expectExceptionMessage("annexe rank must be a positive integer");
+        $this->expectExceptionMessage('annexe rank must be a positive integer');
 
         new Annexe(
             'Annexe 1',
@@ -129,11 +129,11 @@ class AnnexeTest extends TestCase
         $this->assertInstanceOf(UploadedFile::class, $annexe->getUploadedFile());
     }
 
-//    public function testCreateAnnexeWithNoUploadedFileThrowsException(): void
-//    {
-//        $this->expectException(ComelusException::class);
-//        $this->expectExceptionMessage("annexe uploadedfile must not be null");
-//
-//        new Annexe('Annexe 1', 1, null);
-//    }
+    //    public function testCreateAnnexeWithNoUploadedFileThrowsException(): void
+    //    {
+    //        $this->expectException(ComelusException::class);
+    //        $this->expectExceptionMessage("annexe uploadedfile must not be null");
+    //
+    //        new Annexe('Annexe 1', 1, null);
+    //    }
 }

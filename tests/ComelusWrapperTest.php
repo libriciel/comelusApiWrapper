@@ -39,7 +39,7 @@ class ComelusWrapperTest extends TestCase
         $this->expectNotToPerformAssertions();
 
         $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
-        $comelusWrapper->setUrl("http://testurl.fr");
+        $comelusWrapper->setUrl('http://testurl.fr');
     }
 
     public function testSetUrlMalformed()
@@ -49,10 +49,10 @@ class ComelusWrapperTest extends TestCase
         $streamFactory = new Psr17Factory();
 
         $this->expectException(ComelusException::class);
-        $this->expectExceptionMessage("malformed url : missing http|https");
+        $this->expectExceptionMessage('malformed url : missing http|https');
         $this->expectExceptionCode(Response::HTTP_BAD_REQUEST);
         $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
-        $comelusWrapper->setUrl("testurl.fr");
+        $comelusWrapper->setUrl('testurl.fr');
     }
 
     public function testSetApiKey()
@@ -64,7 +64,7 @@ class ComelusWrapperTest extends TestCase
         $this->expectNotToPerformAssertions();
 
         $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
-        $comelusWrapper->setApiKey("myapiKey");
+        $comelusWrapper->setApiKey('myapiKey');
     }
 
     public function testSetApiKeyMalformed()
@@ -74,11 +74,11 @@ class ComelusWrapperTest extends TestCase
         $streamFactory = new Psr17Factory();
 
         $this->expectException(ComelusException::class);
-        $this->expectExceptionMessage("malformed apiKey : no whitespace allowed");
+        $this->expectExceptionMessage('malformed apiKey : no whitespace allowed');
         $this->expectExceptionCode(Response::HTTP_BAD_REQUEST);
 
         $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
-        $comelusWrapper->setApiKey("my apiKey");
+        $comelusWrapper->setApiKey('my apiKey');
     }
 
     public function testCheckWrongApiKey()
@@ -94,7 +94,7 @@ class ComelusWrapperTest extends TestCase
         $comelusWrapper->setApiKey('aqaqzszcdcdcdc');
 
         $this->expectException(ComelusException::class);
-        $this->expectExceptionMessage("bad apKey");
+        $this->expectExceptionMessage('bad apKey');
         $this->expectExceptionCode(401);
 
         $comelusWrapper->check();
@@ -108,11 +108,11 @@ class ComelusWrapperTest extends TestCase
         $streamFactory = new Psr17Factory();
 
         $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
-        $comelusWrapper->setApiKey("myapiKey");
-        $comelusWrapper->setUrl("https://comelus.fr");
+        $comelusWrapper->setApiKey('myapiKey');
+        $comelusWrapper->setUrl('https://comelus.fr');
 
         $content = $comelusWrapper->check();
-        $this->assertSame(["success" => true], $content);
+        $this->assertSame(['success' => true], $content);
     }
 
     public function testCheckMissingUrlAndApiKey()
@@ -124,7 +124,7 @@ class ComelusWrapperTest extends TestCase
         $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
 
         $this->expectException(ComelusException::class);
-        $this->expectExceptionMessage("url and apiKey must be set");
+        $this->expectExceptionMessage('url and apiKey must be set');
         $this->expectExceptionCode(Response::HTTP_BAD_REQUEST);
 
         $comelusWrapper->check();
@@ -137,10 +137,10 @@ class ComelusWrapperTest extends TestCase
         $streamFactory = new Psr17Factory();
 
         $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
-        $comelusWrapper->setUrl("https://comelus.fr");
+        $comelusWrapper->setUrl('https://comelus.fr');
 
         $this->expectException(ComelusException::class);
-        $this->expectExceptionMessage("apiKey must be set");
+        $this->expectExceptionMessage('apiKey must be set');
         $this->expectExceptionCode(Response::HTTP_BAD_REQUEST);
 
         $comelusWrapper->check();
@@ -153,10 +153,10 @@ class ComelusWrapperTest extends TestCase
         $streamFactory = new Psr17Factory();
 
         $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
-        $comelusWrapper->setApiKey("myapiKey");
+        $comelusWrapper->setApiKey('myapiKey');
 
         $this->expectException(ComelusException::class);
-        $this->expectExceptionMessage("url must be set");
+        $this->expectExceptionMessage('url must be set');
         $this->expectExceptionCode(Response::HTTP_BAD_REQUEST);
 
         $comelusWrapper->check();
@@ -171,12 +171,12 @@ class ComelusWrapperTest extends TestCase
         $streamFactory = new Psr17Factory();
 
         $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
-        $comelusWrapper->setApiKey("myapiKey");
-        $comelusWrapper->setUrl("https://comelus.fr");
+        $comelusWrapper->setApiKey('myapiKey');
+        $comelusWrapper->setUrl('https://comelus.fr');
 
         $content = $comelusWrapper->getMailingLists();
 
-        $expected = [["id" => "dc85a85e-0cfe-47f0-9019-ab104b04a6eb", "name" => "myMailingList"]];
+        $expected = [['id' => 'dc85a85e-0cfe-47f0-9019-ab104b04a6eb', 'name' => 'myMailingList']];
         $this->assertSame($expected, $content);
     }
 
@@ -184,15 +184,15 @@ class ComelusWrapperTest extends TestCase
     {
         $expected = [
             [
-                "id" => "f7839360-1995-4ae4-97cf-686570795729",
-                "recipient" => [
-                    "id" => "b221d819-2c88-4570-a1dd-21b64a670390",
-                    "email" => "recipient@libriciel.invalid",
-                    "firstName" => "Marc",
-                    "lastName" => "Dupont",
+                'id' => 'f7839360-1995-4ae4-97cf-686570795729',
+                'recipient' => [
+                    'id' => 'b221d819-2c88-4570-a1dd-21b64a670390',
+                    'email' => 'recipient@libriciel.invalid',
+                    'firstName' => 'Marc',
+                    'lastName' => 'Dupont',
                 ],
-                "sendDate" => "2020-06-02T09:06:19+02:00",
-                "readDate" => null,
+                'sendDate' => '2020-06-02T09:06:19+02:00',
+                'readDate' => null,
             ]
         ];
 
@@ -202,8 +202,8 @@ class ComelusWrapperTest extends TestCase
         $streamFactory = new Psr17Factory();
 
         $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
-        $comelusWrapper->setApiKey("myapiKey");
-        $comelusWrapper->setUrl("https://comelus.fr");
+        $comelusWrapper->setApiKey('myapiKey');
+        $comelusWrapper->setUrl('https://comelus.fr');
 
         $content = $comelusWrapper->getDossierStatus('f7839360-1995-4ae4-97cf-686570795729');
 
@@ -214,11 +214,11 @@ class ComelusWrapperTest extends TestCase
     {
         $expected = [
             [
-                "id" => "e1268ac7-f98f-4d08-8140-7c48389bd308",
-                "name" => "Nouveau document",
-                "mailingList" => [
-                    "id" => "dc85a85e-0cfe-47f0-9019-ab104b04a6eb",
-                    "name" => "Ville"
+                'id' => 'e1268ac7-f98f-4d08-8140-7c48389bd308',
+                'name' => 'Nouveau document',
+                'mailingList' => [
+                    'id' => 'dc85a85e-0cfe-47f0-9019-ab104b04a6eb',
+                    'name' => 'Ville'
                 ]
             ]
         ];
@@ -229,8 +229,8 @@ class ComelusWrapperTest extends TestCase
         $streamFactory = new Psr17Factory();
 
         $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
-        $comelusWrapper->setApiKey("myapiKey");
-        $comelusWrapper->setUrl("https://comelus.fr");
+        $comelusWrapper->setApiKey('myapiKey');
+        $comelusWrapper->setUrl('https://comelus.fr');
 
         $content = $comelusWrapper->getDossiers();
 
@@ -245,19 +245,19 @@ class ComelusWrapperTest extends TestCase
         $streamFactory = new Psr17Factory();
 
         $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
-        $comelusWrapper->setApiKey("myapiKey");
-        $comelusWrapper->setUrl("https://comelus.fr");
+        $comelusWrapper->setApiKey('myapiKey');
+        $comelusWrapper->setUrl('https://comelus.fr');
 
         $content = $comelusWrapper->sendDocument('51edebc7-3299-4da1-94b2-0205745d78db');
 
-        $this->assertSame(["success" => true], $content);
+        $this->assertSame(['success' => true], $content);
     }
 
     public function testCreateDocument()
     {
         $expected = [
-            "success" => true,
-            "id" => "da781241-3c2c-420c-90f8-f2f83df99c74"
+            'success' => true,
+            'id' => 'da781241-3c2c-420c-90f8-f2f83df99c74'
         ];
 
         $response = $this->createResponse(201, json_encode($expected));
@@ -266,8 +266,8 @@ class ComelusWrapperTest extends TestCase
         $streamFactory = new Psr17Factory();
 
         $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
-        $comelusWrapper->setApiKey("myapiKey");
-        $comelusWrapper->setUrl("https://comelus.fr");
+        $comelusWrapper->setApiKey('myapiKey');
+        $comelusWrapper->setUrl('https://comelus.fr');
 
         $uploadedFile = new UploadedFile(
             __DIR__ . '/resources/test.pdf',
@@ -290,8 +290,8 @@ class ComelusWrapperTest extends TestCase
     public function testCreateDocumentMisingCategory()
     {
         $expected = [
-            "success" => true,
-            "id" => "da781241-3c2c-420c-90f8-f2f83df99c74"
+            'success' => true,
+            'id' => 'da781241-3c2c-420c-90f8-f2f83df99c74'
         ];
 
         $response = $this->createResponse(201, json_encode($expected));
@@ -300,8 +300,8 @@ class ComelusWrapperTest extends TestCase
         $streamFactory = new Psr17Factory();
 
         $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
-        $comelusWrapper->setApiKey("myapiKey");
-        $comelusWrapper->setUrl("https://comelus.fr");
+        $comelusWrapper->setApiKey('myapiKey');
+        $comelusWrapper->setUrl('https://comelus.fr');
 
         $uploadedFile = new UploadedFile(
             __DIR__ . '/resources/test.pdf',
@@ -324,8 +324,8 @@ class ComelusWrapperTest extends TestCase
     public function testCreateDocumentMisingCategoryNull()
     {
         $expected = [
-            "success" => true,
-            "id" => "da781241-3c2c-420c-90f8-f2f83df99c74"
+            'success' => true,
+            'id' => 'da781241-3c2c-420c-90f8-f2f83df99c74'
         ];
 
         $response = $this->createResponse(201, json_encode($expected));
@@ -334,8 +334,8 @@ class ComelusWrapperTest extends TestCase
         $streamFactory = new Psr17Factory();
 
         $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
-        $comelusWrapper->setApiKey("myapiKey");
-        $comelusWrapper->setUrl("https://comelus.fr");
+        $comelusWrapper->setApiKey('myapiKey');
+        $comelusWrapper->setUrl('https://comelus.fr');
 
         $uploadedFile = new UploadedFile(
             __DIR__ . '/resources/test.pdf',
@@ -358,8 +358,8 @@ class ComelusWrapperTest extends TestCase
     public function testCreateDocumentMisingName()
     {
         $expected = [
-            "success" => true,
-            "id" => "da781241-3c2c-420c-90f8-f2f83df99c74"
+            'success' => true,
+            'id' => 'da781241-3c2c-420c-90f8-f2f83df99c74'
         ];
 
         $response = $this->createResponse(201, json_encode($expected));
@@ -368,8 +368,8 @@ class ComelusWrapperTest extends TestCase
         $streamFactory = new Psr17Factory();
 
         $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
-        $comelusWrapper->setApiKey("myapiKey");
-        $comelusWrapper->setUrl("https://comelus.fr");
+        $comelusWrapper->setApiKey('myapiKey');
+        $comelusWrapper->setUrl('https://comelus.fr');
 
         $uploadedFile = new UploadedFile(
             __DIR__ . '/resources/test.pdf',
@@ -392,8 +392,8 @@ class ComelusWrapperTest extends TestCase
     public function testCreateDocumentMisingNameNull()
     {
         $expected = [
-            "success" => true,
-            "id" => "da781241-3c2c-420c-90f8-f2f83df99c74"
+            'success' => true,
+            'id' => 'da781241-3c2c-420c-90f8-f2f83df99c74'
         ];
 
         $response = $this->createResponse(201, json_encode($expected));
@@ -402,8 +402,8 @@ class ComelusWrapperTest extends TestCase
         $streamFactory = new Psr17Factory();
 
         $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
-        $comelusWrapper->setApiKey("myapiKey");
-        $comelusWrapper->setUrl("https://comelus.fr");
+        $comelusWrapper->setApiKey('myapiKey');
+        $comelusWrapper->setUrl('https://comelus.fr');
 
         $uploadedFile = new UploadedFile(
             __DIR__ . '/resources/test.pdf',
@@ -426,8 +426,8 @@ class ComelusWrapperTest extends TestCase
     public function testCreateDocumentMisingRankNull()
     {
         $expected = [
-            "success" => true,
-            "id" => "da781241-3c2c-420c-90f8-f2f83df99c74"
+            'success' => true,
+            'id' => 'da781241-3c2c-420c-90f8-f2f83df99c74'
         ];
 
         $response = $this->createResponse(201, json_encode($expected));
@@ -436,8 +436,8 @@ class ComelusWrapperTest extends TestCase
         $streamFactory = new Psr17Factory();
 
         $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
-        $comelusWrapper->setApiKey("myapiKey");
-        $comelusWrapper->setUrl("https://comelus.fr");
+        $comelusWrapper->setApiKey('myapiKey');
+        $comelusWrapper->setUrl('https://comelus.fr');
 
         $uploadedFile = new UploadedFile(
             __DIR__ . '/resources/test.pdf',
@@ -457,14 +457,15 @@ class ComelusWrapperTest extends TestCase
         $this->assertSame($expected, $content);
     }
 
-    public function testCreateDocumentMisingDossierName() {
+    public function testCreateDocumentMisingDossierName()
+    {
         $client = $this->createStub(ClientInterface::class);
         $requestFactory = new Psr17Factory();
         $streamFactory = new Psr17Factory();
 
         $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
-        $comelusWrapper->setUrl("https://comelus.fr");
-        $comelusWrapper->setApiKey("MyApiKey");
+        $comelusWrapper->setUrl('https://comelus.fr');
+        $comelusWrapper->setApiKey('MyApiKey');
 
         $this->expectException(ComelusException::class);
         $this->expectExceptionMessage('dossier name must be not empty');
@@ -486,14 +487,15 @@ class ComelusWrapperTest extends TestCase
         $comelusWrapper->createDossier($dossier);
     }
 
-    public function testCreateDocumentMisingDossierDescription() {
+    public function testCreateDocumentMisingDossierDescription()
+    {
         $client = $this->createStub(ClientInterface::class);
         $requestFactory = new Psr17Factory();
         $streamFactory = new Psr17Factory();
 
         $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
-        $comelusWrapper->setUrl("https://comelus.fr");
-        $comelusWrapper->setApiKey("MyApiKey");
+        $comelusWrapper->setUrl('https://comelus.fr');
+        $comelusWrapper->setApiKey('MyApiKey');
 
         $this->expectException(ComelusException::class);
         $this->expectExceptionMessage('dossier description must be not empty');
@@ -515,14 +517,15 @@ class ComelusWrapperTest extends TestCase
         $comelusWrapper->createDossier($dossier);
     }
 
-    public function testCreateDocumentMisingDossierMailingListId() {
+    public function testCreateDocumentMisingDossierMailingListId()
+    {
         $client = $this->createStub(ClientInterface::class);
         $requestFactory = new Psr17Factory();
         $streamFactory = new Psr17Factory();
 
         $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
-        $comelusWrapper->setUrl("https://comelus.fr");
-        $comelusWrapper->setApiKey("MyApiKey");
+        $comelusWrapper->setUrl('https://comelus.fr');
+        $comelusWrapper->setApiKey('MyApiKey');
 
         $this->expectException(ComelusException::class);
         $this->expectExceptionMessage('dossier mailingListId must be not empty');
@@ -544,14 +547,15 @@ class ComelusWrapperTest extends TestCase
         $comelusWrapper->createDossier($dossier);
     }
 
-    public function testCreateDocumentNotValidDossierMailingListId() {
+    public function testCreateDocumentNotValidDossierMailingListId()
+    {
         $client = $this->createStub(ClientInterface::class);
         $requestFactory = new Psr17Factory();
         $streamFactory = new Psr17Factory();
 
         $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
-        $comelusWrapper->setUrl("https://comelus.fr");
-        $comelusWrapper->setApiKey("MyApiKey");
+        $comelusWrapper->setUrl('https://comelus.fr');
+        $comelusWrapper->setApiKey('MyApiKey');
 
         $this->expectException(ComelusException::class);
         $this->expectExceptionMessage('dossier mailingListId is not a valid UUID');

@@ -38,7 +38,7 @@ class DossierTest extends TestCase
     public function testCreateDossierWithEmptyNameThrowsException(): void
     {
         $this->expectException(ComelusException::class);
-        $this->expectExceptionMessage("dossier name must be not empty");
+        $this->expectExceptionMessage('dossier name must be not empty');
 
         $uuid = Uuid::v7()->toRfc4122();
         $file = new File(
@@ -59,7 +59,7 @@ class DossierTest extends TestCase
     public function testCreateDossierWithInvalidUuidThrowsException(): void
     {
         $this->expectException(ComelusException::class);
-        $this->expectExceptionMessage("dossier mailingListId is not a valid UUID");
+        $this->expectExceptionMessage('dossier mailingListId is not a valid UUID');
 
         $file = new File(
             'Facture',
@@ -84,7 +84,7 @@ class DossierTest extends TestCase
     public function testCreateDossierWithNoFilesThrowsException(): void
     {
         $this->expectException(ComelusException::class);
-        $this->expectExceptionMessage("Dossier must contain at least one file");
+        $this->expectExceptionMessage('Dossier must contain at least one file');
 
         $uuid = Uuid::v7()->toRfc4122();
 
@@ -129,7 +129,7 @@ class DossierTest extends TestCase
     public function testCreateDossierWithEmptyDescriptionThrowsException(): void
     {
         $this->expectException(ComelusException::class);
-        $this->expectExceptionMessage("dossier description must be not empty");
+        $this->expectExceptionMessage('dossier description must be not empty');
 
         $uuid = Uuid::v7()->toRfc4122();
         $uploadedFile = new UploadedFile(

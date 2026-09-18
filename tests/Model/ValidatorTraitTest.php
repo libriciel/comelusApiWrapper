@@ -12,7 +12,7 @@ class ValidatorTraitTest extends TestCase
 {
     private function makeValidator(): object
     {
-        return new class {
+        return new class() {
             use ValidatorTrait;
         };
     }

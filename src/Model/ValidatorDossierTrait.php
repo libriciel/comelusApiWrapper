@@ -11,7 +11,7 @@ trait ValidatorDossierTrait
     public function validateDossierName(?string $name): void
     {
         $this->validateString($name, 'dossier name');
-        $this->validateLength($name,  Dossier::MAX_LENGTH_DOSSIER_NAME, 'dossier name');
+        $this->validateLength($name, Dossier::MAX_LENGTH_DOSSIER_NAME, 'dossier name');
     }
 
     public function validateMailingListId(string $mailingListId): void
@@ -19,7 +19,7 @@ trait ValidatorDossierTrait
         $this->validateString($mailingListId, 'dossier mailingListId');
 
         if ($this->isValidUuid($mailingListId) === false) {
-            throw new ComelusException("dossier mailingListId is not a valid UUID", 400);
+            throw new ComelusException('dossier mailingListId is not a valid UUID', 400);
         }
     }
 }
