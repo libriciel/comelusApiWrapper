@@ -9,8 +9,8 @@ class Annexe
     use ValidatorTrait;
 
     public function __construct(
-        private ?string $name = null,
-        private ?int $rank = null,
+        private ?string $name,
+        private ?int $rank,
         private UploadedFile $uploadedFile,
     ) {
         if (!empty($this->name)) {

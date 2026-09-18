@@ -9,9 +9,9 @@ class File
     use ValidatorTrait;
 
     public function __construct(
-        private ?string $category = null,
-        private ?string $name = null,
-        private ?int $rank = null,
+        private ?string $category,
+        private ?string $name,
+        private ?int $rank,
         private UploadedFile $uploadedFile,
         private ?array $annexes = [],
     ) {
