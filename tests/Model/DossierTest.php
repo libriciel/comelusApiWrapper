@@ -36,6 +36,16 @@ final class DossierTest extends TestCase
         $this->assertCount(1, $dossier->getAttachedFiles());
     }
 
+    public function testCreateDossierNamedZero(): void
+    {
+        $uploadedFile = new UploadedFile(__DIR__ . '/../resources/test.pdf', 'test.pdf');
+
+        $dossier = new Dossier('0', '0', Uuid::v7()->toRfc4122(), [new File('Facture', 'facture.pdf', 1, $uploadedFile, [])]);
+
+        $this->assertSame('0', $dossier->getName());
+        $this->assertSame('0', $dossier->getDescription());
+    }
+
     // Cas d'erreur : Nom vide pour le dossier
     public function testCreateDossierWithEmptyNameThrowsException(): void
     {

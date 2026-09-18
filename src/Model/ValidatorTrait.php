@@ -11,7 +11,7 @@ trait ValidatorTrait
 {
     public function validateString(string $value, string $fieldName): void
     {
-        if (empty(trim($value))) {
+        if (trim($value) === '') {
             throw new ComelusException("$fieldName must be not empty", 400);
         }
     }

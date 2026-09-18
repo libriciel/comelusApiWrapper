@@ -13,6 +13,7 @@ All notable changes to this project will be documented in this file.
 - Clé d'API terminée par un retour à la ligne acceptée par `setApiKey()` (puis envoyée telle quelle dans l'en-tête `Authorization`)
 - URL terminée par un retour à la ligne acceptée par `setUrl()`
 - URL terminée par `/` : les requêtes partaient vers `https://…//api/v2/…` ; la barre finale est désormais retirée par `setUrl()`
+- Dossier dont le nom ou la description vaut `"0"` refusé (« must be not empty »)
 
 ### Suppressions
 

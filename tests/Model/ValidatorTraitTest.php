@@ -27,6 +27,14 @@ final class ValidatorTraitTest extends TestCase
         $validator->validateString('Hello', 'test field');
     }
 
+    public function testValidateStringWithZeroPasses(): void
+    {
+        $this->expectNotToPerformAssertions();
+
+        $validator = $this->makeValidator();
+        $validator->validateString('0', 'test field');
+    }
+
     public function testValidateStringWithWhitespaceOnlyThrowsException(): void
     {
         $validator = $this->makeValidator();
