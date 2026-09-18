@@ -38,6 +38,38 @@ class AnnexeTest extends TestCase
         $this->assertInstanceOf(UploadedFile::class, $annexe->getUploadedFile());
     }
 
+    public function testCreateAnnexeWithNullName(): void
+    {
+        $annexe = new Annexe(
+            null,
+            1,
+            new UploadedFile(
+                __DIR__ . '/../resources/test.pdf',
+                'test.pdf'
+            )
+        );
+
+        $this->assertEquals('', $annexe->getName());
+        $this->assertEquals(1, $annexe->getRank());
+        $this->assertInstanceOf(UploadedFile::class, $annexe->getUploadedFile());
+    }
+
+    public function testCreateAnnexeWithNullRank(): void
+    {
+        $annexe = new Annexe(
+            'test',
+            null,
+            new UploadedFile(
+                __DIR__ . '/../resources/test.pdf',
+                'test.pdf'
+            )
+        );
+
+        $this->assertEquals('test', $annexe->getName());
+        $this->assertEquals(null, $annexe->getRank());
+        $this->assertInstanceOf(UploadedFile::class, $annexe->getUploadedFile());
+    }
+
     public function testCreateAnnexeWithMaxNameLengthAllowed(): void
     {
         $maxName = str_repeat('a', 512);

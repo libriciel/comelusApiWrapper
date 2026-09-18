@@ -59,7 +59,7 @@ class DossierTest extends TestCase
     public function testCreateDossierWithInvalidUuidThrowsException(): void
     {
         $this->expectException(ComelusException::class);
-        $this->expectExceptionMessage("dossier mailingListId is not id valid");
+        $this->expectExceptionMessage("dossier mailingListId is not a valid UUID");
 
         $file = new File(
             'Facture',

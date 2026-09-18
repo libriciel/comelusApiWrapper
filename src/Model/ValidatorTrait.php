@@ -36,6 +36,10 @@ trait ValidatorTrait
         if ($uploadedfile === null) {
             throw new ComelusException("$fieldName must not be null", 400);
         }
+
+        if (!file_exists($uploadedfile->getPathname())) {
+            throw new ComelusException("$fieldName file not found", 400);
+        }
     }
 
     public function isValidUuid(string $uuid): bool

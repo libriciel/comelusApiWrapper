@@ -77,7 +77,7 @@ class ValidatorDossierTraitTest extends TestCase
     {
         $validator = $this->makeValidator();
         $this->expectException(ComelusException::class);
-        $this->expectExceptionMessage('dossier mailingListId is not id valid');
+        $this->expectExceptionMessage('dossier mailingListId is not a valid UUID');
         $validator->validateMailingListId('invalid-uuid');
     }
 }

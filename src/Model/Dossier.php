@@ -9,9 +9,10 @@ class Dossier
     use ValidatorDossierTrait;
     use ValidatorTrait;
 
-    public const MAX_LENGTH_DOSSIER_NAME = 512;
+    public const int MAX_LENGTH_DOSSIER_NAME = 512;
 
-    public function __construct(private readonly string $name,
+    public function __construct(
+        private readonly string $name,
         private readonly string $description,
         private readonly string $mailingListId,
         private array $attachedFiles,

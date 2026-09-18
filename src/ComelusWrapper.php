@@ -161,10 +161,10 @@ class ComelusWrapper
             $builder->addResource("attachedFiles[{$key}][name]", $file->getName());
             $builder->addResource("attachedFiles[{$key}][rank]", strval($file->getRank()));
             $builder->addResource("attachedFiles[{$key}][uploadedfile]",
-                fopen($file->getUploadedfile()->getPathname(), 'r'),
+                fopen($file->getUploadedFile()->getPathname(), 'r'),
                 [
-                    'filename' => $file->getUploadedfile()->getClientOriginalName(),
-                    'headers' => ['Content-Type' => $file->getUploadedfile()->getMimeType()]
+                    'filename' => $file->getUploadedFile()->getClientOriginalName(),
+                    'headers' => ['Content-Type' => $file->getUploadedFile()->getMimeType()]
                 ]
             );
 
@@ -174,10 +174,10 @@ class ComelusWrapper
                 $builder->addResource("attachedFiles[{$key}][annexes][{$keyAnnexe}][rank]", strval($annexe->getRank()));
                 $builder->addResource(
                     "attachedFiles[{$key}][annexes][{$keyAnnexe}][uploadedfile]",
-                    fopen($annexe->getUploadedfile()->getPathname(), 'r'),
+                    fopen($annexe->getUploadedFile()->getPathname(), 'r'),
                     [
-                        'filename' => $annexe->getUploadedfile()->getClientOriginalName(),
-                        'headers' => ['Content-Type' => $annexe->getUploadedfile()->getMimeType()]
+                        'filename' => $annexe->getUploadedFile()->getClientOriginalName(),
+                        'headers' => ['Content-Type' => $annexe->getUploadedFile()->getMimeType()]
                     ]
                 );
             }

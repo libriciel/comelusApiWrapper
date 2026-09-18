@@ -317,7 +317,207 @@ class ComelusWrapperTest extends TestCase
             __DIR__ . '/resources/test.pdf',
             'test.pdf'
         );
-        $file = new File('Facture', 'facture.pdf', 1, $uploadedFile, []);
+        $file = new File('Facture', 'facture dossier', 1, $uploadedFile, []);
+        $dossier = new Dossier(
+            'myDocument',
+            'Nouveau document',
+            '44edebc7-3299-4da1-94b2-0202245d78db',
+            [
+                $file
+            ]
+        );
+
+        $content = $comelusWrapper->createDossier($dossier);
+        $this->assertSame($expected, $content);
+    }
+
+    public function testCreateDocumentMisingCategory()
+    {
+        $expected = [
+            "success" => true,
+            "id" => "da781241-3c2c-420c-90f8-f2f83df99c74"
+        ];
+
+        $response = $this->mockResponse(201, '', $this->mockBody(json_encode($expected)));
+        $client = $this->mockClient($response);
+        $requestFactory = $this->mockRequestFactory();
+        $streamFactory = $this->createMock(StreamFactoryInterface::class);
+
+        $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
+        $comelusWrapper->setApiKey("myapiKey");
+        $comelusWrapper->setUrl("https://comelus.fr");
+
+        $file = $this->createMock(UploadedFileInterface::class);
+
+        $file->method('getStream')->willReturn(Stream::create("my stream"));
+        $file->method('getClientFilename')->willReturn("deliberation.pdf");
+        $file->method('getClientMediaType')->willReturn("application/pdf");
+
+        $uploadedFile = new UploadedFile(
+            __DIR__ . '/resources/test.pdf',
+            'test.pdf'
+        );
+        $file = new File('', 'test', 1, $uploadedFile, []);
+        $dossier = new Dossier(
+            'myDocument',
+            'Nouveau document',
+            '44edebc7-3299-4da1-94b2-0202245d78db',
+            [
+                $file
+            ]
+        );
+
+        $content = $comelusWrapper->createDossier($dossier);
+        $this->assertSame($expected, $content);
+    }
+
+    public function testCreateDocumentMisingCategoryNull()
+    {
+        $expected = [
+            "success" => true,
+            "id" => "da781241-3c2c-420c-90f8-f2f83df99c74"
+        ];
+
+        $response = $this->mockResponse(201, '', $this->mockBody(json_encode($expected)));
+        $client = $this->mockClient($response);
+        $requestFactory = $this->mockRequestFactory();
+        $streamFactory = $this->createMock(StreamFactoryInterface::class);
+
+        $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
+        $comelusWrapper->setApiKey("myapiKey");
+        $comelusWrapper->setUrl("https://comelus.fr");
+
+        $file = $this->createMock(UploadedFileInterface::class);
+
+        $file->method('getStream')->willReturn(Stream::create("my stream"));
+        $file->method('getClientFilename')->willReturn("deliberation.pdf");
+        $file->method('getClientMediaType')->willReturn("application/pdf");
+
+        $uploadedFile = new UploadedFile(
+            __DIR__ . '/resources/test.pdf',
+            'test.pdf'
+        );
+        $file = new File(null, 'test', 1, $uploadedFile, []);
+        $dossier = new Dossier(
+            'myDocument',
+            'Nouveau document',
+            '44edebc7-3299-4da1-94b2-0202245d78db',
+            [
+                $file
+            ]
+        );
+
+        $content = $comelusWrapper->createDossier($dossier);
+        $this->assertSame($expected, $content);
+    }
+
+    public function testCreateDocumentMisingName()
+    {
+        $expected = [
+            "success" => true,
+            "id" => "da781241-3c2c-420c-90f8-f2f83df99c74"
+        ];
+
+        $response = $this->mockResponse(201, '', $this->mockBody(json_encode($expected)));
+        $client = $this->mockClient($response);
+        $requestFactory = $this->mockRequestFactory();
+        $streamFactory = $this->createMock(StreamFactoryInterface::class);
+
+        $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
+        $comelusWrapper->setApiKey("myapiKey");
+        $comelusWrapper->setUrl("https://comelus.fr");
+
+        $file = $this->createMock(UploadedFileInterface::class);
+
+        $file->method('getStream')->willReturn(Stream::create("my stream"));
+        $file->method('getClientFilename')->willReturn("deliberation.pdf");
+        $file->method('getClientMediaType')->willReturn("application/pdf");
+
+        $uploadedFile = new UploadedFile(
+            __DIR__ . '/resources/test.pdf',
+            'test.pdf'
+        );
+        $file = new File('Facture', '', 1, $uploadedFile, []);
+        $dossier = new Dossier(
+            'myDocument',
+            'Nouveau document',
+            '44edebc7-3299-4da1-94b2-0202245d78db',
+            [
+                $file
+            ]
+        );
+
+        $content = $comelusWrapper->createDossier($dossier);
+        $this->assertSame($expected, $content);
+    }
+
+    public function testCreateDocumentMisingNameNull()
+    {
+        $expected = [
+            "success" => true,
+            "id" => "da781241-3c2c-420c-90f8-f2f83df99c74"
+        ];
+
+        $response = $this->mockResponse(201, '', $this->mockBody(json_encode($expected)));
+        $client = $this->mockClient($response);
+        $requestFactory = $this->mockRequestFactory();
+        $streamFactory = $this->createMock(StreamFactoryInterface::class);
+
+        $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
+        $comelusWrapper->setApiKey("myapiKey");
+        $comelusWrapper->setUrl("https://comelus.fr");
+
+        $file = $this->createMock(UploadedFileInterface::class);
+
+        $file->method('getStream')->willReturn(Stream::create("my stream"));
+        $file->method('getClientFilename')->willReturn("deliberation.pdf");
+        $file->method('getClientMediaType')->willReturn("application/pdf");
+
+        $uploadedFile = new UploadedFile(
+            __DIR__ . '/resources/test.pdf',
+            'test.pdf'
+        );
+        $file = new File('Facture', null, 1, $uploadedFile, []);
+        $dossier = new Dossier(
+            'myDocument',
+            'Nouveau document',
+            '44edebc7-3299-4da1-94b2-0202245d78db',
+            [
+                $file
+            ]
+        );
+
+        $content = $comelusWrapper->createDossier($dossier);
+        $this->assertSame($expected, $content);
+    }
+
+    public function testCreateDocumentMisingRankNull()
+    {
+        $expected = [
+            "success" => true,
+            "id" => "da781241-3c2c-420c-90f8-f2f83df99c74"
+        ];
+
+        $response = $this->mockResponse(201, '', $this->mockBody(json_encode($expected)));
+        $client = $this->mockClient($response);
+        $requestFactory = $this->mockRequestFactory();
+        $streamFactory = $this->createMock(StreamFactoryInterface::class);
+
+        $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
+        $comelusWrapper->setApiKey("myapiKey");
+        $comelusWrapper->setUrl("https://comelus.fr");
+
+        $file = $this->createMock(UploadedFileInterface::class);
+
+        $file->method('getStream')->willReturn(Stream::create("my stream"));
+        $file->method('getClientFilename')->willReturn("deliberation.pdf");
+        $file->method('getClientMediaType')->willReturn("application/pdf");
+
+        $uploadedFile = new UploadedFile(
+            __DIR__ . '/resources/test.pdf',
+            'test.pdf'
+        );
+        $file = new File('Facture', 'test', null, $uploadedFile, []);
         $dossier = new Dossier(
             'myDocument',
             'Nouveau document',
@@ -428,7 +628,7 @@ class ComelusWrapperTest extends TestCase
         $comelusWrapper->setApiKey("MyApiKey");
 
         $this->expectException(ComelusException::class);
-        $this->expectExceptionMessage('dossier mailingListId is not id valid');
+        $this->expectExceptionMessage('dossier mailingListId is not a valid UUID');
         $this->expectExceptionCode(Response::HTTP_BAD_REQUEST);
 
         $uploadedFile = new UploadedFile(

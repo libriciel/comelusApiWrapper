@@ -9,27 +9,36 @@ class Annexe
     use ValidatorTrait;
 
     public function __construct(
-        private readonly string $name,
-        private readonly int $rank,
-        private readonly UploadedFile $uploadedfile,
+        private ?string $name = null,
+        private ?int $rank = null,
+        private UploadedFile $uploadedFile,
     ) {
-        $this->validateLength($name, 512, 'annexe name');
-        $this->validatePositiveInt($rank, 'annexe rank');
-        $this->validateUploadedFile($uploadedfile, 'annexe uploadedfile');
+        if (!empty($this->name)) {
+            $this->validateString($this->name, 'annexe name');
+            $this->validateLength($this->name, 512, 'annexe name');
+        }
+
+        if ($this->rank !== null) {
+            $this->validatePositiveInt($this->rank, 'annexe rank');
+        }
+
+        $this->validateUploadedFile($this->uploadedFile, 'annexe uploadedFile');
+
+        $this->name = $this->name ?: null;
     }
 
-    public function getName(): string
+    public function getName(): ?string
     {
         return $this->name;
     }
 
-    public function getRank(): int
+    public function getRank(): ?int
     {
         return $this->rank;
     }
 
-    public function getUploadedfile(): UploadedFile
+    public function getUploadedFile(): UploadedFile
     {
-        return $this->uploadedfile;
+        return $this->uploadedFile;
     }
 }

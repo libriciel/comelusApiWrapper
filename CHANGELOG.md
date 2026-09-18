@@ -1,6 +1,14 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [4.0.0] - 2026-XX-XX
+
+### Evolutions
+
+### Modifications
+
+### Suppressions
+
 ## [3.0.0] - 2025-09-19
 
 ### Evolutions

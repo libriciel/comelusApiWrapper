@@ -71,7 +71,7 @@ class ValidatorTraitTest extends TestCase
             __DIR__ . '/../resources/test.pdf',
             'test.pdf'
         );
-        $validator->validateUploadedFile($uploadedFile, 'file uploadedfile');
+        $validator->validateUploadedFile($uploadedFile, 'file uploadedfile is not a valid uploaded file');
         $this->assertTrue(true);
     }
 

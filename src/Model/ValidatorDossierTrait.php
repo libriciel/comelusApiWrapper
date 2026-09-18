@@ -19,7 +19,7 @@ trait ValidatorDossierTrait
         $this->validateString($mailingListId, 'dossier mailingListId');
 
         if ($this->isValidUuid($mailingListId) === false) {
-            throw new ComelusException("dossier mailingListId is not id valid", 400);
+            throw new ComelusException("dossier mailingListId is not a valid UUID", 400);
         }
     }
 }

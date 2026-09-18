@@ -9,41 +9,52 @@ class File
     use ValidatorTrait;
 
     public function __construct(
-        private readonly string $category,
-        private readonly string $name,
-        private readonly int $rank,
-        private readonly UploadedFile $uploadedfile,
-        private ?array $annexes,
+        private ?string $category = null,
+        private ?string $name = null,
+        private ?int $rank = null,
+        private UploadedFile $uploadedFile,
+        private ?array $annexes = [],
     ) {
-        if ($category !== null) {
-            $this->validateString($category, 'file category');
-            $this->validateLength($category, 255, 'file category');
+        if (!empty($this->category)) {
+            $this->validateString($this->category, 'file category');
+            $this->validateLength($this->category, 255, 'file category');
         }
 
-        $this->validateLength($name, 512, 'file name');
-        $this->validatePositiveInt($rank, 'file rank');
-        $this->validateUploadedFile($uploadedfile, 'file uploadedfile');
-        $this->annexes = $annexes ?? [];
+        if (!empty($this->name)) {
+            $this->validateString($this->name, 'file name');
+            $this->validateLength($this->name, 512, 'file name');
+        }
+
+        if ($this->rank !== null) {
+            $this->validatePositiveInt($this->rank, 'file rank');
+        }
+
+        $this->validateUploadedFile($this->uploadedFile, 'file uploadedFile');
+
+        // Normalize optional fields: if null, convert to empty string; keep empty string as-is
+        $this->category = $this->category ?? '';
+        $this->name = $this->name ?? '';
+        $this->annexes ??= [];
     }
 
-    public function getCategory(): string
+    public function getCategory(): ?string
     {
         return $this->category;
     }
 
-    public function getName(): string
+    public function getName(): ?string
     {
         return $this->name;
     }
 
-    public function getRank(): int
+    public function getRank(): ?int
     {
         return $this->rank;
     }
 
-    public function getUploadedfile(): UploadedFile
+    public function getUploadedFile(): UploadedFile
     {
-        return $this->uploadedfile;
+        return $this->uploadedFile;
     }
 
     public function getAnnexes(): ?array
