@@ -16,22 +16,16 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ComelusWrapper
 {
-    private string $baseRoutePath = '/api/v2';
+    private const string BASE_ROUTE_PATH = '/api/v2';
 
-    private $client;
-    private $requestFactory;
     private $url;
     private $apiKey;
-    private $streamFactory;
 
     public function __construct(
-        ClientInterface $client,
-        RequestFactoryInterface $requestFactory,
-        StreamFactoryInterface $streamFactory
+        private readonly ClientInterface $client,
+        private readonly RequestFactoryInterface $requestFactory,
+        private readonly StreamFactoryInterface $streamFactory,
     ) {
-        $this->client = $client;
-        $this->requestFactory = $requestFactory;
-        $this->streamFactory = $streamFactory;
     }
 
     /**
@@ -85,7 +79,7 @@ class ComelusWrapper
      */
     public function check(): array
     {
-        return $this->sendRequest($this->baseRoutePath . '/check');
+        return $this->sendRequest(self::BASE_ROUTE_PATH . '/check');
     }
 
     /**
@@ -93,7 +87,7 @@ class ComelusWrapper
      */
     public function getMailingLists(): array
     {
-        return $this->sendRequest($this->baseRoutePath . '/mailing-lists');
+        return $this->sendRequest(self::BASE_ROUTE_PATH . '/mailing-lists');
     }
 
     /**
@@ -101,7 +95,7 @@ class ComelusWrapper
      */
     public function getDossiers(): array
     {
-        return $this->sendRequest($this->baseRoutePath . '/dossiers');
+        return $this->sendRequest(self::BASE_ROUTE_PATH . '/dossiers');
     }
 
     /**
@@ -111,7 +105,7 @@ class ComelusWrapper
      */
     public function getDossierStatus(string $dossierId): array
     {
-        return $this->sendRequest($this->baseRoutePath . "/dossier/$dossierId/status");
+        return $this->sendRequest(self::BASE_ROUTE_PATH . "/dossier/$dossierId/status");
     }
 
     public function createDossier(Dossier $dossier)
@@ -122,7 +116,7 @@ class ComelusWrapper
 
         $request = $this->requestFactory->createRequest(
             'POST',
-            "$this->url" . $this->baseRoutePath . '/dossier'
+            "$this->url" . self::BASE_ROUTE_PATH . '/dossier'
         )
             ->withHeader('Content-Type', 'multipart/form-data; boundary="' . $builder->getBoundary() . '"')
             ->withAddedHeader('Authorization', 'Bearer ' . $this->apiKey)
@@ -136,12 +130,8 @@ class ComelusWrapper
         }
 
         if ($response->getStatusCode() != Response::HTTP_CREATED) {
-            $message = $response->getReasonPhrase();
-            if ($response->getBody()) {
-                $content = json_decode($response->getBody()->getContents(), true);
-                $message = $content['message'] ?? $response->getReasonPhrase();
-
-            }
+            $content = json_decode($response->getBody()->getContents(), true);
+            $message = $content['message'] ?? $response->getReasonPhrase();
 
             throw new ComelusException($message, $response->getStatusCode());
         }
@@ -194,7 +184,7 @@ class ComelusWrapper
      */
     public function sendDocument(string $documentId): array
     {
-        return $this->sendRequest($this->baseRoutePath . "/dossier/$documentId/send", 'POST');
+        return $this->sendRequest(self::BASE_ROUTE_PATH . "/dossier/$documentId/send", 'POST');
     }
 
     /**
@@ -215,12 +205,9 @@ class ComelusWrapper
         }
 
         if ($response->getStatusCode() != Response::HTTP_OK) {
-            $message = $response->getReasonPhrase();
-            if ($response->getBody()) {
-                $content = json_decode($response->getBody()->getContents(), true);
-                $message = $content['message'] ?? $response->getReasonPhrase();
+            $content = json_decode($response->getBody()->getContents(), true);
+            $message = $content['message'] ?? $response->getReasonPhrase();
 
-            }
             throw new ComelusException($message, $response->getStatusCode());
         }
 

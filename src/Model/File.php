@@ -13,8 +13,8 @@ class File
     public function __construct(
         private ?string $category,
         private ?string $name,
-        private ?int $rank,
-        private UploadedFile $uploadedFile,
+        private readonly ?int $rank,
+        private readonly UploadedFile $uploadedFile,
         private ?array $annexes = [],
     ) {
         if (!empty($this->category)) {

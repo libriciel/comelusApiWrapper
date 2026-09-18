@@ -12,8 +12,8 @@ class Annexe
 
     public function __construct(
         private ?string $name,
-        private ?int $rank,
-        private UploadedFile $uploadedFile,
+        private readonly ?int $rank,
+        private readonly UploadedFile $uploadedFile,
     ) {
         if (!empty($this->name)) {
             $this->validateString($this->name, 'annexe name');
