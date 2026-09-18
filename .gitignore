@@ -1,8 +1,5 @@
-/vendor/
 /.idea/
-/.php_cs.cache
-
-###> symfony/phpunit-bridge ###
-.phpunit
-.phpunit.result.cache
-/phpunit.xml
+/vendor/
+/.phpunit.result.cache
+/coverage/
+/.phpunit.cache/
