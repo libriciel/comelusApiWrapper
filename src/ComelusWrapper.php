@@ -207,10 +207,7 @@ class ComelusWrapper
         $body = $response->getBody()->getContents();
 
         if ($response->getStatusCode() !== $expectedStatusCode) {
-            $content = json_decode($body, true);
-            $message = $content['message'] ?? $response->getReasonPhrase();
-
-            throw new ComelusException($message, $response->getStatusCode());
+            throw new ComelusException($this->getErrorMessage($body, $response->getReasonPhrase()), $response->getStatusCode());
         }
 
         try {
@@ -224,5 +221,16 @@ class ComelusWrapper
         }
 
         return $data;
+    }
+
+    /**
+     * Error message sent by the API ({"message": "..."}), or the HTTP reason phrase ("Forbidden"...) as a fallback.
+     */
+    private function getErrorMessage(string $body, string $reasonPhrase): string
+    {
+        $content = json_decode($body, true);
+        $message = is_array($content) ? ($content['message'] ?? null) : null;
+
+        return is_string($message) && $message !== '' ? $message : $reasonPhrase;
     }
 }

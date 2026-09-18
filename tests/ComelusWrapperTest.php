@@ -803,4 +803,40 @@ final class ComelusWrapperTest extends TestCase
 
         $comelusWrapper->createDossier($this->createDossierWithOneFile());
     }
+
+    public function testCheckErrorResponseWithNonStringMessageUsesReasonPhrase(): void
+    {
+        $response = $this->createResponse(422, '{"message":["name is required","rank must be positive"]}', 'Unprocessable Content');
+        $comelusWrapper = $this->createWrapper($this->stubClient($response));
+
+        $this->expectException(ComelusException::class);
+        $this->expectExceptionMessage('Unprocessable Content');
+        $this->expectExceptionCode(422);
+
+        $comelusWrapper->check();
+    }
+
+    public function testCheckErrorResponseWithNumericMessageUsesReasonPhrase(): void
+    {
+        $response = $this->createResponse(500, '{"message":42}', 'Internal Server Error');
+        $comelusWrapper = $this->createWrapper($this->stubClient($response));
+
+        $this->expectException(ComelusException::class);
+        $this->expectExceptionMessage('Internal Server Error');
+        $this->expectExceptionCode(500);
+
+        $comelusWrapper->check();
+    }
+
+    public function testCreateDossierErrorResponseWithEmptyMessageUsesReasonPhrase(): void
+    {
+        $response = $this->createResponse(403, '{"message":""}', 'Forbidden');
+        $comelusWrapper = $this->createWrapper($this->stubClient($response));
+
+        $this->expectException(ComelusException::class);
+        $this->expectExceptionMessage('Forbidden');
+        $this->expectExceptionCode(403);
+
+        $comelusWrapper->createDossier($this->createDossierWithOneFile());
+    }
 }
