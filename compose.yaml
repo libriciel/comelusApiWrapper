@@ -1,0 +1,10 @@
+services:
+  php:
+    build:
+      context: .
+      args:
+        PHP_VERSION: ${PHP_VERSION:-8.3}
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+    volumes:
+      - ./:/app
