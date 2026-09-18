@@ -115,7 +115,7 @@ final class FileTest extends TestCase
         $this->assertCount(0, $file->getAnnexes());  // Aucune annexe associée
     }
 
-    public function testCreateValidFileWithoutCategoryNameRakAnnexe(): void
+    public function testCreateValidFileWithoutCategoryNameRankAnnexe(): void
     {
         $uploadedFile = new UploadedFile(
             __DIR__ . '/../resources/test.pdf',
@@ -296,7 +296,7 @@ final class FileTest extends TestCase
         $this->assertSame('', $file->getName());
     }
 
-    public function testCreateFileWithNameToLongThrowsException(): void
+    public function testCreateFileWithNameTooLongThrowsException(): void
     {
         $this->expectException(ComelusException::class);
         $this->expectExceptionMessage("The field 'file name' must not exceed 512 characters.");
@@ -334,7 +334,7 @@ final class FileTest extends TestCase
     }
 
     // Catégorie trop longue (>255) doit lever une exception
-    public function testCreateFileWithCategoryToLongThrowsException(): void
+    public function testCreateFileWithCategoryTooLongThrowsException(): void
     {
         $this->expectException(ComelusException::class);
         $this->expectExceptionMessage("The field 'file category' must not exceed 255 characters.");

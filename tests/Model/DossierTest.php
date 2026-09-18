@@ -30,9 +30,9 @@ final class DossierTest extends TestCase
             [$file]
         );
 
-        $this->assertEquals('Projet Alpha', $dossier->getName());
-        $this->assertEquals('Description du projet', $dossier->getDescription());
-        $this->assertEquals($uuid, $dossier->getMailingListId());
+        $this->assertSame('Projet Alpha', $dossier->getName());
+        $this->assertSame('Description du projet', $dossier->getDescription());
+        $this->assertSame($uuid, $dossier->getMailingListId());
         $this->assertCount(1, $dossier->getAttachedFiles());
     }
 
@@ -116,8 +116,8 @@ final class DossierTest extends TestCase
 
         $dossier = new Dossier($maxName, 'Desc', $uuid, [$file]);
 
-        $this->assertEquals($maxName, $dossier->getName());
-        $this->assertEquals('Desc', $dossier->getDescription());
+        $this->assertSame($maxName, $dossier->getName());
+        $this->assertSame('Desc', $dossier->getDescription());
     }
 
     // Nom de dossier trop long (>512) doit lever une exception
@@ -169,6 +169,6 @@ final class DossierTest extends TestCase
 
         $dossier->addFile($file2);
         $this->assertCount(2, $dossier->getAttachedFiles());
-        $this->assertEquals('recu.pdf', $dossier->getAttachedFiles()[1]->getName());
+        $this->assertSame('recu.pdf', $dossier->getAttachedFiles()[1]->getName());
     }
 }

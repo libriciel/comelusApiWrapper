@@ -404,7 +404,7 @@ final class ComelusWrapperTest extends TestCase
         $this->assertSame($expected, $content);
     }
 
-    public function testCreateDocumentMisingCategory()
+    public function testCreateDocumentMissingCategory()
     {
         $expected = [
             'success' => true,
@@ -438,7 +438,7 @@ final class ComelusWrapperTest extends TestCase
         $this->assertSame($expected, $content);
     }
 
-    public function testCreateDocumentMisingCategoryNull()
+    public function testCreateDocumentMissingCategoryNull()
     {
         $expected = [
             'success' => true,
@@ -472,7 +472,7 @@ final class ComelusWrapperTest extends TestCase
         $this->assertSame($expected, $content);
     }
 
-    public function testCreateDocumentMisingName()
+    public function testCreateDocumentMissingName()
     {
         $expected = [
             'success' => true,
@@ -506,7 +506,7 @@ final class ComelusWrapperTest extends TestCase
         $this->assertSame($expected, $content);
     }
 
-    public function testCreateDocumentMisingNameNull()
+    public function testCreateDocumentMissingNameNull()
     {
         $expected = [
             'success' => true,
@@ -540,7 +540,7 @@ final class ComelusWrapperTest extends TestCase
         $this->assertSame($expected, $content);
     }
 
-    public function testCreateDocumentMisingRankNull()
+    public function testCreateDocumentMissingRankNull()
     {
         $expected = [
             'success' => true,
@@ -574,7 +574,7 @@ final class ComelusWrapperTest extends TestCase
         $this->assertSame($expected, $content);
     }
 
-    public function testCreateDocumentMisingDossierName()
+    public function testCreateDocumentMissingDossierName()
     {
         $client = $this->createStub(ClientInterface::class);
         $requestFactory = new Psr17Factory();
@@ -604,7 +604,7 @@ final class ComelusWrapperTest extends TestCase
         $comelusWrapper->createDossier($dossier);
     }
 
-    public function testCreateDocumentMisingDossierDescription()
+    public function testCreateDocumentMissingDossierDescription()
     {
         $client = $this->createStub(ClientInterface::class);
         $requestFactory = new Psr17Factory();
@@ -634,7 +634,7 @@ final class ComelusWrapperTest extends TestCase
         $comelusWrapper->createDossier($dossier);
     }
 
-    public function testCreateDocumentMisingDossierMailingListId()
+    public function testCreateDocumentMissingDossierMailingListId()
     {
         $client = $this->createStub(ClientInterface::class);
         $requestFactory = new Psr17Factory();

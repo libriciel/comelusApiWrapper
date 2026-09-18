@@ -100,7 +100,7 @@ final class AnnexeTest extends TestCase
         $this->assertInstanceOf(UploadedFile::class, $annexe->getUploadedFile());
     }
 
-    public function testCreateAnnexeWithNameToLongThrowsException(): void
+    public function testCreateAnnexeWithNameTooLongThrowsException(): void
     {
         $this->expectException(ComelusException::class);
         $this->expectExceptionMessage("The field 'annexe name' must not exceed 512 characters.");
@@ -144,12 +144,4 @@ final class AnnexeTest extends TestCase
         $this->assertSame(0, $annexe->getRank());
         $this->assertInstanceOf(UploadedFile::class, $annexe->getUploadedFile());
     }
-
-    //    public function testCreateAnnexeWithNoUploadedFileThrowsException(): void
-    //    {
-    //        $this->expectException(ComelusException::class);
-    //        $this->expectExceptionMessage("annexe uploadedfile must not be null");
-    //
-    //        new Annexe('Annexe 1', 1, null);
-    //    }
 }
