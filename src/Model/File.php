@@ -12,15 +12,19 @@ class File
 
     private readonly string $category;
 
+    /** @var array<Annexe> */
+    private array $annexes;
+
     /**
      * @param ?string $category optional: null or blank is sent empty, the dossier then has no category
+     * @param ?array<Annexe> $annexes
      */
     public function __construct(
         ?string $category,
         private readonly string $name,
         private readonly int $rank,
         private readonly UploadedFile $uploadedFile,
-        private ?array $annexes = [],
+        ?array $annexes = [],
     ) {
         $this->category = $this->normalizeOptionalString($category);
 
@@ -33,7 +37,7 @@ class File
         $this->validatePositiveInt($this->rank, 'file rank');
         $this->validateUploadedFile($this->uploadedFile, 'file uploadedFile');
 
-        $this->annexes ??= [];
+        $this->annexes = $annexes ?? [];
     }
 
     public function getCategory(): string
@@ -56,7 +60,10 @@ class File
         return $this->uploadedFile;
     }
 
-    public function getAnnexes(): ?array
+    /**
+     * @return array<Annexe>
+     */
+    public function getAnnexes(): array
     {
         return $this->annexes;
     }

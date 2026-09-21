@@ -5,18 +5,16 @@ declare(strict_types=1);
 namespace Libriciel\ComelusApiWrapper\Test\Model;
 
 use Libriciel\ComelusApiWrapper\ComelusException;
-use Libriciel\ComelusApiWrapper\Model\ValidatorTrait;
+use Libriciel\ComelusApiWrapper\Test\Model\Fixtures\ValidatorTraitHost;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Uid\Uuid;
 
 final class ValidatorTraitTest extends TestCase
 {
-    private function makeValidator(): object
+    private function makeValidator(): ValidatorTraitHost
     {
-        return new class() {
-            use ValidatorTrait;
-        };
+        return new ValidatorTraitHost();
     }
 
     public function testValidateLengthWithinLimitPasses(): void

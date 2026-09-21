@@ -205,8 +205,7 @@ final class FileTest extends TestCase
 
         $file = new File('Facture', 'facture.pdf', 1, $uploadedFile, null);
 
-        $this->assertIsArray($file->getAnnexes());
-        $this->assertCount(0, $file->getAnnexes());
+        $this->assertSame([], $file->getAnnexes());
     }
 
     // addAnnexe ajoute bien l'annexe à la liste

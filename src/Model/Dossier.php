@@ -21,6 +21,9 @@ class Dossier
      */
     public const string NAME_PATTERN = '/^[\p{L}\p{M}\p{N}\p{Zs}\p{P}\p{Sc}°+]+$/Du';
 
+    /**
+     * @param array<File> $attachedFiles
+     */
     public function __construct(
         private readonly string $name,
         private readonly string $description,
@@ -51,6 +54,9 @@ class Dossier
         return $this->mailingListId;
     }
 
+    /**
+     * @return array<File>
+     */
     public function getAttachedFiles(): array
     {
         return $this->attachedFiles;

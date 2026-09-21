@@ -90,7 +90,7 @@ final class ComelusWrapperTest extends TestCase
         );
     }
 
-    public function testSetUrl()
+    public function testSetUrl(): void
     {
         $client = $this->createStub(ClientInterface::class);
         $requestFactory = new Psr17Factory();
@@ -102,7 +102,7 @@ final class ComelusWrapperTest extends TestCase
         $comelusWrapper->setUrl('https://testurl.fr');
     }
 
-    public function testSetUrlMalformed()
+    public function testSetUrlMalformed(): void
     {
         $client = $this->createStub(ClientInterface::class);
         $requestFactory = new Psr17Factory();
@@ -115,7 +115,7 @@ final class ComelusWrapperTest extends TestCase
         $comelusWrapper->setUrl('testurl.fr');
     }
 
-    public function testSetApiKey()
+    public function testSetApiKey(): void
     {
         $client = $this->createStub(ClientInterface::class);
         $requestFactory = new Psr17Factory();
@@ -127,7 +127,7 @@ final class ComelusWrapperTest extends TestCase
         $comelusWrapper->setApiKey('myapiKey');
     }
 
-    public function testSetApiKeyMalformed()
+    public function testSetApiKeyMalformed(): void
     {
         $client = $this->createStub(ClientInterface::class);
         $requestFactory = new Psr17Factory();
@@ -198,7 +198,7 @@ final class ComelusWrapperTest extends TestCase
         $comelusWrapper->setApiKey("myapiKey\n");
     }
 
-    public function testCheckWrongApiKey()
+    public function testCheckWrongApiKey(): void
     {
         $requestFactory = new Psr17Factory();
         $streamFactory = new Psr17Factory();
@@ -217,7 +217,7 @@ final class ComelusWrapperTest extends TestCase
         $comelusWrapper->check();
     }
 
-    public function testCheck()
+    public function testCheck(): void
     {
         $response = $this->createResponse(200, '{"success":true}');
         $client = $this->stubClient($response);
@@ -232,7 +232,7 @@ final class ComelusWrapperTest extends TestCase
         $this->assertSame(['success' => true], $content);
     }
 
-    public function testCheckMissingUrlAndApiKey()
+    public function testCheckMissingUrlAndApiKey(): void
     {
         $client = $this->createStub(ClientInterface::class);
         $requestFactory = new Psr17Factory();
@@ -247,7 +247,7 @@ final class ComelusWrapperTest extends TestCase
         $comelusWrapper->check();
     }
 
-    public function testCheckMissingApiKey()
+    public function testCheckMissingApiKey(): void
     {
         $client = $this->createStub(ClientInterface::class);
         $requestFactory = new Psr17Factory();
@@ -263,7 +263,7 @@ final class ComelusWrapperTest extends TestCase
         $comelusWrapper->check();
     }
 
-    public function testCheckMissingUrl()
+    public function testCheckMissingUrl(): void
     {
         $client = $this->createStub(ClientInterface::class);
         $requestFactory = new Psr17Factory();
@@ -279,7 +279,7 @@ final class ComelusWrapperTest extends TestCase
         $comelusWrapper->check();
     }
 
-    public function testGetMailingLists()
+    public function testGetMailingLists(): void
     {
         $jsonResponse = '[{"id":"dc85a85e-0cfe-47f0-9019-ab104b04a6eb", "name":"myMailingList"}]';
         $response = $this->createResponse(200, $jsonResponse);
@@ -297,7 +297,7 @@ final class ComelusWrapperTest extends TestCase
         $this->assertSame($expected, $content);
     }
 
-    public function testGetDocumentStatus()
+    public function testGetDocumentStatus(): void
     {
         $expected = [
             [
@@ -313,7 +313,7 @@ final class ComelusWrapperTest extends TestCase
             ]
         ];
 
-        $response = $this->createResponse(200, json_encode($expected));
+        $response = $this->createResponse(200, json_encode($expected, JSON_THROW_ON_ERROR));
         $client = $this->stubClient($response);
         $requestFactory = new Psr17Factory();
         $streamFactory = new Psr17Factory();
@@ -327,7 +327,7 @@ final class ComelusWrapperTest extends TestCase
         $this->assertSame($expected, $content);
     }
 
-    public function testGetDocuments()
+    public function testGetDocuments(): void
     {
         $expected = [
             [
@@ -340,7 +340,7 @@ final class ComelusWrapperTest extends TestCase
             ]
         ];
 
-        $response = $this->createResponse(200, json_encode($expected));
+        $response = $this->createResponse(200, json_encode($expected, JSON_THROW_ON_ERROR));
         $client = $this->stubClient($response);
         $requestFactory = new Psr17Factory();
         $streamFactory = new Psr17Factory();
@@ -354,7 +354,7 @@ final class ComelusWrapperTest extends TestCase
         $this->assertSame($expected, $content);
     }
 
-    public function testSendDocument()
+    public function testSendDocument(): void
     {
         $response = $this->createResponse(200, '{"success":true}');
         $client = $this->stubClient($response);
@@ -370,14 +370,14 @@ final class ComelusWrapperTest extends TestCase
         $this->assertSame(['success' => true], $content);
     }
 
-    public function testCreateDocument()
+    public function testCreateDocument(): void
     {
         $expected = [
             'success' => true,
             'id' => 'da781241-3c2c-420c-90f8-f2f83df99c74'
         ];
 
-        $response = $this->createResponse(201, json_encode($expected));
+        $response = $this->createResponse(201, json_encode($expected, JSON_THROW_ON_ERROR));
         $client = $this->stubClient($response);
         $requestFactory = new Psr17Factory();
         $streamFactory = new Psr17Factory();
@@ -404,14 +404,14 @@ final class ComelusWrapperTest extends TestCase
         $this->assertSame($expected, $content);
     }
 
-    public function testCreateDocumentMissingCategory()
+    public function testCreateDocumentMissingCategory(): void
     {
         $expected = [
             'success' => true,
             'id' => 'da781241-3c2c-420c-90f8-f2f83df99c74'
         ];
 
-        $response = $this->createResponse(201, json_encode($expected));
+        $response = $this->createResponse(201, json_encode($expected, JSON_THROW_ON_ERROR));
         $client = $this->stubClient($response);
         $requestFactory = new Psr17Factory();
         $streamFactory = new Psr17Factory();
@@ -438,14 +438,14 @@ final class ComelusWrapperTest extends TestCase
         $this->assertSame($expected, $content);
     }
 
-    public function testCreateDocumentMissingCategoryNull()
+    public function testCreateDocumentMissingCategoryNull(): void
     {
         $expected = [
             'success' => true,
             'id' => 'da781241-3c2c-420c-90f8-f2f83df99c74'
         ];
 
-        $response = $this->createResponse(201, json_encode($expected));
+        $response = $this->createResponse(201, json_encode($expected, JSON_THROW_ON_ERROR));
         $client = $this->stubClient($response);
         $requestFactory = new Psr17Factory();
         $streamFactory = new Psr17Factory();
@@ -472,7 +472,7 @@ final class ComelusWrapperTest extends TestCase
         $this->assertSame($expected, $content);
     }
 
-    public function testCreateDocumentMissingDossierName()
+    public function testCreateDocumentMissingDossierName(): void
     {
         $client = $this->createStub(ClientInterface::class);
         $requestFactory = new Psr17Factory();
@@ -502,7 +502,7 @@ final class ComelusWrapperTest extends TestCase
         $comelusWrapper->createDossier($dossier);
     }
 
-    public function testCreateDocumentMissingDossierDescription()
+    public function testCreateDocumentMissingDossierDescription(): void
     {
         $client = $this->createStub(ClientInterface::class);
         $requestFactory = new Psr17Factory();
@@ -532,7 +532,7 @@ final class ComelusWrapperTest extends TestCase
         $comelusWrapper->createDossier($dossier);
     }
 
-    public function testCreateDocumentMissingDossierMailingListId()
+    public function testCreateDocumentMissingDossierMailingListId(): void
     {
         $client = $this->createStub(ClientInterface::class);
         $requestFactory = new Psr17Factory();
@@ -562,7 +562,7 @@ final class ComelusWrapperTest extends TestCase
         $comelusWrapper->createDossier($dossier);
     }
 
-    public function testCreateDocumentNotValidDossierMailingListId()
+    public function testCreateDocumentNotValidDossierMailingListId(): void
     {
         $client = $this->createStub(ClientInterface::class);
         $requestFactory = new Psr17Factory();

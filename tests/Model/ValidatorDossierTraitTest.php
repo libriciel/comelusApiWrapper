@@ -6,18 +6,16 @@ namespace Libriciel\ComelusApiWrapper\Test\Model;
 
 use Libriciel\ComelusApiWrapper\ComelusException;
 use Libriciel\ComelusApiWrapper\Model\Dossier;
-use Libriciel\ComelusApiWrapper\Model\ValidatorDossierTrait;
+use Libriciel\ComelusApiWrapper\Test\Model\Fixtures\ValidatorDossierTraitHost;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Uid\Uuid;
 
 final class ValidatorDossierTraitTest extends TestCase
 {
-    private function makeValidator(): object
+    private function makeValidator(): ValidatorDossierTraitHost
     {
-        return new class() {
-            use ValidatorDossierTrait;
-        };
+        return new ValidatorDossierTraitHost();
     }
 
     public function testValidateDossierNameWithValidValuePasses(): void

@@ -21,8 +21,8 @@ class ComelusWrapper
 {
     private const string BASE_ROUTE_PATH = '/api/v2';
 
-    private $url;
-    private $apiKey;
+    private ?string $url = null;
+    private ?string $apiKey = null;
 
     public function __construct(
         private readonly ClientInterface $client,
@@ -62,9 +62,11 @@ class ComelusWrapper
     }
 
     /**
+     * @return array{string, string} url and apiKey
+     *
      * @throws ComelusException
      */
-    private function isInit(): void
+    private function getCredentials(): array
     {
         if (!$this->url && !$this->apiKey) {
             throw new ComelusException('url and apiKey must be set', Response::HTTP_BAD_REQUEST);
@@ -77,10 +79,14 @@ class ComelusWrapper
         if (!$this->apiKey) {
             throw new ComelusException('apiKey must be set', Response::HTTP_BAD_REQUEST);
         }
+
+        return [$this->url, $this->apiKey];
     }
 
     /**
      * @throws ComelusException
+     * @return array<mixed>
+     *
      */
     public function check(): array
     {
@@ -89,6 +95,8 @@ class ComelusWrapper
 
     /**
      * @throws ComelusException
+     * @return array<mixed>
+     *
      */
     public function getMailingLists(): array
     {
@@ -97,6 +105,8 @@ class ComelusWrapper
 
     /**
      * @throws ComelusException
+     * @return array<mixed>
+     *
      */
     public function getDossiers(): array
     {
@@ -104,8 +114,8 @@ class ComelusWrapper
     }
 
     /**
-     * @param string $dossierId
-     * @return array
+     * @return array<mixed>
+     *
      * @throws ComelusException
      */
     public function getDossierStatus(string $dossierId): array
@@ -115,19 +125,18 @@ class ComelusWrapper
 
     /**
      * @throws ComelusException
+     * @return array<mixed>
+     *
      */
     public function createDossier(Dossier $dossier): array
     {
-        $this->isInit();
+        [$url, $apiKey] = $this->getCredentials();
 
         $builder = $this->prepareMultipart($dossier);
 
-        $request = $this->requestFactory->createRequest(
-            'POST',
-            "$this->url" . self::BASE_ROUTE_PATH . '/dossier'
-        )
+        $request = $this->requestFactory->createRequest('POST', $url . self::BASE_ROUTE_PATH . '/dossier')
             ->withHeader('Content-Type', 'multipart/form-data; boundary="' . $builder->getBoundary() . '"')
-            ->withAddedHeader('Authorization', 'Bearer ' . $this->apiKey)
+            ->withAddedHeader('Authorization', 'Bearer ' . $apiKey)
             ->withBody($builder->build())
         ;
 
@@ -142,14 +151,12 @@ class ComelusWrapper
         $builder->addResource('description', $dossier->getDescription());
         $builder->addResource('mailingListId', $dossier->getMailingListId());
 
-        /** @var File $file */
         foreach ($dossier->getAttachedFiles() as $key => $file) {
             $builder->addResource("attachedFiles[{$key}][category]", $file->getCategory());
             $builder->addResource("attachedFiles[{$key}][name]", $file->getName());
             $builder->addResource("attachedFiles[{$key}][rank]", strval($file->getRank()));
             $this->addFile($builder, "attachedFiles[{$key}][uploadedfile]", $file->getUploadedFile());
 
-            /** @var Annexe $annexe */
             foreach ($file->getAnnexes() as $keyAnnexe => $annexe) {
                 $builder->addResource("attachedFiles[{$key}][annexes][{$keyAnnexe}][name]", $annexe->getName());
                 $builder->addResource("attachedFiles[{$key}][annexes][{$keyAnnexe}][rank]", strval($annexe->getRank()));
@@ -187,6 +194,8 @@ class ComelusWrapper
 
     /**
      * @throws ComelusException
+     * @return array<mixed>
+     *
      */
     public function sendDocument(string $documentId): array
     {
@@ -195,20 +204,22 @@ class ComelusWrapper
 
     /**
      * @throws ComelusException
+     * @return array<mixed>
+     *
      */
     private function sendRequest(string $path, string $method = 'GET'): array
     {
-        $this->isInit();
-        $request = $this->requestFactory->createRequest(
-            $method,
-            "$this->url" . $path
-        )->withHeader('Authorization', 'Bearer ' . $this->apiKey);
+        [$url, $apiKey] = $this->getCredentials();
+        $request = $this->requestFactory->createRequest($method, $url . $path)
+            ->withHeader('Authorization', 'Bearer ' . $apiKey);
 
         return $this->send($request, Response::HTTP_OK);
     }
 
     /**
      * @throws ComelusException
+     * @return array<mixed>
+     *
      */
     private function send(RequestInterface $request, int $expectedStatusCode): array
     {
