@@ -19,6 +19,7 @@ All notable changes to this project will be documented in this file.
 - URL terminée par un retour à la ligne acceptée par `setUrl()`
 - URL terminée par `/` : les requêtes partaient vers `https://…//api/v2/…` ; la barre finale est désormais retirée par `setUrl()`
 - Fichier ou annexe supprimé (ou devenu illisible) entre sa création et `createDossier()` : `ComelusException` (code 400, « … file not readable ») au lieu d'un warning PHP suivi d'une exception de `symfony/mime`
+- Type MIME d'un fichier non reconnu : un en-tête `Content-Type` vide était envoyé ; il est désormais déduit du nom du fichier
 
 ### Suppressions
 

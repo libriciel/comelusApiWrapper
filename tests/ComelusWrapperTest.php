@@ -863,4 +863,36 @@ final class ComelusWrapperTest extends TestCase
             $this->assertStringContainsString("name=\"{$field}\"\r\n\r\n{$value}\r\n", $body);
         }
     }
+
+    /**
+     * getMimeType() renvoie null quand le type n'est pas reconnu : aucun en-tête vide ne doit partir,
+     * MultipartStreamBuilder déduit alors le type du nom de fichier.
+     */
+    public function testCreateDossierWithUnknownMimeTypeGuessesContentTypeFromFilename(): void
+    {
+        $uploadedFile = new class(__DIR__ . '/resources/test.pdf', 'test.pdf') extends UploadedFile {
+            public function getMimeType(): ?string
+            {
+                return null;
+            }
+        };
+        $dossier = new Dossier(
+            'myDocument',
+            'Nouveau document',
+            '44edebc7-3299-4da1-94b2-0202245d78db',
+            [new File('Projets', 'Délibération', 1, $uploadedFile, [])]
+        );
+        $response = $this->createResponse(201, '{"success":true}');
+        $comelusWrapper = $this->createWrapper($this->capturingClient($response));
+
+        $comelusWrapper->createDossier($dossier);
+
+        $this->assertNotNull($this->sentRequest);
+        $body = (string) $this->sentRequest->getBody();
+        $this->assertStringNotContainsString("Content-Type: \r\n", $body);
+        $this->assertStringContainsString(
+            "name=\"attachedFiles[0][uploadedfile]\"; filename=\"test.pdf\"\r\nContent-Type: application/pdf\r\n",
+            $body
+        );
+    }
 }

@@ -176,9 +176,12 @@ class ComelusWrapper
             throw new ComelusException("$fieldName file not readable", Response::HTTP_BAD_REQUEST);
         }
 
+        // Unknown MIME type: no header, MultipartStreamBuilder then guesses it from the file name
+        $mimeType = $uploadedFile->getMimeType();
+
         $builder->addResource($fieldName, $resource, [
             'filename' => $uploadedFile->getClientOriginalName(),
-            'headers' => ['Content-Type' => $uploadedFile->getMimeType()],
+            'headers' => $mimeType !== null ? ['Content-Type' => $mimeType] : [],
         ]);
     }
 
