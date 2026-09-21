@@ -146,6 +146,9 @@ class ComelusWrapper
         return $this->send($request, Response::HTTP_CREATED);
     }
 
+    /**
+     * @throws ComelusException
+     */
     private function prepareMultipart(Dossier $dossier): MultipartStreamBuilder
     {
         $builder = new MultipartStreamBuilder($this->streamFactory);

@@ -4,12 +4,16 @@ declare(strict_types=1);
 
 namespace Libriciel\ComelusApiWrapper\Model;
 
+use Libriciel\ComelusApiWrapper\ComelusException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 final class Annexe
 {
     use ValidatorTrait;
 
+    /**
+     * @throws ComelusException
+     */
     public function __construct(
         private readonly string $name,
         private readonly int $rank,

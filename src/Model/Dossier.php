@@ -23,6 +23,8 @@ final class Dossier
 
     /**
      * @param array<File> $attachedFiles
+     *
+     * @throws ComelusException
      */
     public function __construct(
         private readonly string $name,

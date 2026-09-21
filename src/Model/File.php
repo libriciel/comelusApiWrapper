@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Libriciel\ComelusApiWrapper\Model;
 
+use Libriciel\ComelusApiWrapper\ComelusException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 final class File
@@ -18,6 +19,8 @@ final class File
     /**
      * @param ?string $category optional: null or blank is sent empty, the dossier then has no category
      * @param ?array<Annexe> $annexes
+     *
+     * @throws ComelusException
      */
     public function __construct(
         ?string $category,
