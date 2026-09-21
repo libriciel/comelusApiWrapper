@@ -36,7 +36,7 @@ final class Dossier
         $this->validateNotEmpty($description, 'dossier description');
         $this->validateMailingListId($mailingListId);
 
-        if (count($attachedFiles) < 1) {
+        if ($attachedFiles === []) {
             throw new ComelusException('Dossier must contain at least one file', 400);
         }
     }
