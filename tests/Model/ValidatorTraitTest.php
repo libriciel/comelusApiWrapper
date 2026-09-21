@@ -19,30 +19,6 @@ final class ValidatorTraitTest extends TestCase
         };
     }
 
-    public function testValidateStringWithNonEmptyValuePasses(): void
-    {
-        $this->expectNotToPerformAssertions();
-
-        $validator = $this->makeValidator();
-        $validator->validateString('Hello', 'test field');
-    }
-
-    public function testValidateStringWithZeroPasses(): void
-    {
-        $this->expectNotToPerformAssertions();
-
-        $validator = $this->makeValidator();
-        $validator->validateString('0', 'test field');
-    }
-
-    public function testValidateStringWithWhitespaceOnlyThrowsException(): void
-    {
-        $validator = $this->makeValidator();
-        $this->expectException(ComelusException::class);
-        $this->expectExceptionMessage('test field must be not empty');
-        $validator->validateString('   ', 'test field');
-    }
-
     public function testValidateLengthWithinLimitPasses(): void
     {
         $this->expectNotToPerformAssertions();
@@ -118,11 +94,15 @@ final class ValidatorTraitTest extends TestCase
         $this->assertFalse($validator->isValidUuid('12345678-1234-1234-1234-12345678901Z'));
     }
 
-    public function testValidateNotEmptyWithBlankValuePasses(): void
+    /**
+     * Écart volontaire avec Comélus, qui accepte un texte blanc : il n'a jamais de sens.
+     */
+    public function testValidateNotEmptyWithBlankValueThrowsException(): void
     {
-        $this->expectNotToPerformAssertions();
+        $this->expectException(ComelusException::class);
+        $this->expectExceptionMessage('field must be not empty');
 
-        $this->makeValidator()->validateNotEmpty('   ', 'field');
+        $this->makeValidator()->validateNotEmpty(" \t ", 'field');
     }
 
     public function testValidateNotEmptyWithEmptyValueThrowsException(): void
@@ -154,5 +134,24 @@ final class ValidatorTraitTest extends TestCase
         $this->expectExceptionMessage('rank must be greater than 0');
 
         $this->makeValidator()->validateStrictlyPositiveInt(0, 'rank');
+    }
+
+    /**
+     * Même règle que Uuid::isValid() de symfony/uid 6.4, utilisé par Comélus : toute version, variante RFC 4122.
+     */
+    public function testIsValidUuidAcceptsAnyVersion(): void
+    {
+        $validator = $this->makeValidator();
+
+        $this->assertTrue($validator->isValidUuid('44edebc7-3299-2da1-94b2-0202245d78db'));
+        $this->assertTrue($validator->isValidUuid('44edebc7-3299-0da1-94b2-0202245d78db'));
+    }
+
+    public function testIsValidUuidRejectsTrailingNewlineAndWrongVariant(): void
+    {
+        $validator = $this->makeValidator();
+
+        $this->assertFalse($validator->isValidUuid("44edebc7-3299-4da1-94b2-0202245d78db\n"));
+        $this->assertFalse($validator->isValidUuid('44edebc7-3299-4da1-c4b2-0202245d78db'));
     }
 }

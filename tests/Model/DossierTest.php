@@ -36,16 +36,6 @@ final class DossierTest extends TestCase
         $this->assertCount(1, $dossier->getAttachedFiles());
     }
 
-    public function testCreateDossierNamedZero(): void
-    {
-        $uploadedFile = new UploadedFile(__DIR__ . '/../resources/test.pdf', 'test.pdf');
-
-        $dossier = new Dossier('0', '0', Uuid::v7()->toRfc4122(), [new File('Facture', 'facture.pdf', 1, $uploadedFile, [])]);
-
-        $this->assertSame('0', $dossier->getName());
-        $this->assertSame('0', $dossier->getDescription());
-    }
-
     // Cas d'erreur : Nom vide pour le dossier
     public function testCreateDossierWithEmptyNameThrowsException(): void
     {
@@ -103,40 +93,6 @@ final class DossierTest extends TestCase
         new Dossier('Projet Alpha', 'Description du projet', $uuid, []);
     }
 
-    // Nom de dossier longueur maximale autorisée (512)
-    public function testCreateDossierWithMaxNameLengthAllowed(): void
-    {
-        $uuid = Uuid::v7()->toRfc4122();
-        $maxName = str_repeat('a', 512);
-        $uploadedFile = new UploadedFile(
-            __DIR__ . '/../resources/test.pdf',
-            'test.pdf'
-        );
-        $file = new File('Facture', 'facture.pdf', 1, $uploadedFile, []);
-
-        $dossier = new Dossier($maxName, 'Desc', $uuid, [$file]);
-
-        $this->assertSame($maxName, $dossier->getName());
-        $this->assertSame('Desc', $dossier->getDescription());
-    }
-
-    // Nom de dossier trop long (>512) doit lever une exception
-    public function testCreateDossierWithNameTooLongThrowsException(): void
-    {
-        $this->expectException(ComelusException::class);
-        $this->expectExceptionMessage("The field 'dossier name' must not exceed 512 characters.");
-
-        $uuid = Uuid::v7()->toRfc4122();
-        $tooLongName = substr(str_repeat(md5((string) mt_rand()), 513), 0, 513);
-        $uploadedFile = new UploadedFile(
-            __DIR__ . '/../resources/test.pdf',
-            'test.pdf'
-        );
-        $file = new File('Facture', 'facture.pdf', 1, $uploadedFile, []);
-
-        new Dossier($tooLongName, 'Desc', $uuid, [$file]);
-    }
-
     // Description vide doit lever une exception
     public function testCreateDossierWithEmptyDescriptionThrowsException(): void
     {
@@ -170,5 +126,59 @@ final class DossierTest extends TestCase
         $dossier->addFile($file2);
         $this->assertCount(2, $dossier->getAttachedFiles());
         $this->assertSame('recu.pdf', $dossier->getAttachedFiles()[1]->getName());
+    }
+
+    /**
+     * Comélus refuse `!$name` et `!$dossierDescription` (ApiV2Manager) : "0" est refusé comme ''.
+     */
+    public function testCreateDossierNamedZeroThrowsException(): void
+    {
+        $this->expectException(ComelusException::class);
+        $this->expectExceptionMessage('dossier name must be not empty');
+        $this->expectExceptionCode(400);
+
+        new Dossier('0', 'Description', Uuid::v7()->toRfc4122(), [$this->file()]);
+    }
+
+    public function testCreateDossierWithZeroDescriptionThrowsException(): void
+    {
+        $this->expectException(ComelusException::class);
+        $this->expectExceptionMessage('dossier description must be not empty');
+        $this->expectExceptionCode(400);
+
+        new Dossier('Nom', '0', Uuid::v7()->toRfc4122(), [$this->file()]);
+    }
+
+    public function testCreateDossierWithBlankDescriptionThrowsException(): void
+    {
+        $this->expectException(ComelusException::class);
+        $this->expectExceptionMessage('dossier description must be not empty');
+
+        new Dossier('Nom', '   ', Uuid::v7()->toRfc4122(), [$this->file()]);
+    }
+
+    /**
+     * Comélus refuse `strlen($name) >= 512` : 511 octets au plus.
+     */
+    public function testCreateDossierWithMaxNameLengthAllowed(): void
+    {
+        $maxName = str_repeat('a', 511);
+
+        $dossier = new Dossier($maxName, 'Desc', Uuid::v7()->toRfc4122(), [$this->file()]);
+
+        $this->assertSame($maxName, $dossier->getName());
+    }
+
+    public function testCreateDossierWithNameTooLongThrowsException(): void
+    {
+        $this->expectException(ComelusException::class);
+        $this->expectExceptionMessage("The field 'dossier name' must not exceed 511 characters.");
+
+        new Dossier(str_repeat('a', 512), 'Desc', Uuid::v7()->toRfc4122(), [$this->file()]);
+    }
+
+    private function file(): File
+    {
+        return new File('Facture', 'facture.pdf', 1, new UploadedFile(__DIR__ . '/../resources/test.pdf', 'test.pdf'));
     }
 }

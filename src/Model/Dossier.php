@@ -11,7 +11,15 @@ class Dossier
     use ValidatorDossierTrait;
     use ValidatorTrait;
 
-    public const int MAX_LENGTH_DOSSIER_NAME = 512;
+    /**
+     * In bytes: Comélus refuses `strlen($name) >= 512`.
+     */
+    public const int MAX_LENGTH_DOSSIER_NAME = 511;
+
+    /**
+     * Comélus Dossier::NAME_PATTERN: letters, digits, spaces, punctuation, currency symbols, ° and +.
+     */
+    public const string NAME_PATTERN = '/^[\p{L}\p{M}\p{N}\p{Zs}\p{P}\p{Sc}°+]+$/Du';
 
     public function __construct(
         private readonly string $name,
@@ -20,7 +28,7 @@ class Dossier
         private array $attachedFiles,
     ) {
         $this->validateDossierName($name);
-        $this->validateString($description, 'dossier description');
+        $this->validateNotEmpty($description, 'dossier description');
         $this->validateMailingListId($mailingListId);
 
         if (count($attachedFiles) < 1) {

@@ -492,7 +492,7 @@ final class ComelusWrapperTest extends TestCase
         );
         $file = new File('Facture', 'facture.pdf', 1, $uploadedFile, []);
         $dossier = new Dossier(
-            ' ',
+            '',
             'Description du projet',
             Uuid::v7()->toRfc4122(),
             [
@@ -523,7 +523,7 @@ final class ComelusWrapperTest extends TestCase
         $file = new File('Facture', 'facture.pdf', 1, $uploadedFile, []);
         $dossier = new Dossier(
             'Projet Alpha',
-            ' ',
+            '',
             Uuid::v7()->toRfc4122(),
             [
                 $file

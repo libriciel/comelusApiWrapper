@@ -9,19 +9,13 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 trait ValidatorTrait
 {
-    public function validateString(string $value, string $fieldName): void
-    {
-        if (trim($value) === '') {
-            throw new ComelusException("$fieldName must be not empty", 400);
-        }
-    }
-
     /**
-     * Same rule as Comélus (`!$value`): '' and '0' are refused, a blank value is accepted.
+     * Same rule as Comélus (`!$value`): '' and '0' are refused.
+     * Deliberately stricter: a blank value, accepted by Comélus, is refused too since it is never meaningful.
      */
     public function validateNotEmpty(string $value, string $fieldName): void
     {
-        if ($value === '' || $value === '0') {
+        if (trim($value) === '' || $value === '0') {
             throw new ComelusException("$fieldName must be not empty", 400);
         }
     }
@@ -65,10 +59,13 @@ trait ValidatorTrait
         }
     }
 
+    /**
+     * Same rule as Uuid::isValid() of symfony/uid 6.4, used by Comélus: any version, RFC 4122 variant.
+     */
     public function isValidUuid(string $uuid): bool
     {
         return preg_match(
-            '/^[0-9a-f]{8}-[0-9a-f]{4}-[13-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i',
+            '/^[0-9a-f]{8}(?:-[0-9a-f]{4}){2}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/Di',
             $uuid
         ) === 1;
     }

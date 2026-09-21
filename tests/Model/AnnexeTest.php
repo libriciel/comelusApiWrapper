@@ -94,11 +94,12 @@ final class AnnexeTest extends TestCase
         yield 'zero' => ['0'];
     }
 
-    public function testCreateAnnexeWithBlankNameIsKept(): void
+    public function testCreateAnnexeWithBlankNameThrowsException(): void
     {
-        $annexe = new Annexe('   ', 1, $this->uploadedFile());
+        $this->expectException(ComelusException::class);
+        $this->expectExceptionMessage('annexe name must be not empty');
 
-        $this->assertSame('   ', $annexe->getName());
+        new Annexe('   ', 1, $this->uploadedFile());
     }
 
     public function testCreateAnnexeWithNullNameThrowsTypeError(): void

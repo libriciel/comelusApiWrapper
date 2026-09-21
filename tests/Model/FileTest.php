@@ -258,11 +258,12 @@ final class FileTest extends TestCase
         yield 'zero' => ['0'];
     }
 
-    public function testCreateFileWithBlankNameIsKept(): void
+    public function testCreateFileWithBlankNameThrowsException(): void
     {
-        $file = new File('Facture', '   ', 1, $this->uploadedFile());
+        $this->expectException(ComelusException::class);
+        $this->expectExceptionMessage('file name must be not empty');
 
-        $this->assertSame('   ', $file->getName());
+        new File('Facture', '   ', 1, $this->uploadedFile());
     }
 
     public function testCreateFileWithNullNameThrowsTypeError(): void
