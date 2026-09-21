@@ -117,4 +117,42 @@ final class ValidatorTraitTest extends TestCase
         $this->assertFalse($validator->isValidUuid('not-a-uuid'));
         $this->assertFalse($validator->isValidUuid('12345678-1234-1234-1234-12345678901Z'));
     }
+
+    public function testValidateNotEmptyWithBlankValuePasses(): void
+    {
+        $this->expectNotToPerformAssertions();
+
+        $this->makeValidator()->validateNotEmpty('   ', 'field');
+    }
+
+    public function testValidateNotEmptyWithEmptyValueThrowsException(): void
+    {
+        $this->expectException(ComelusException::class);
+        $this->expectExceptionMessage('field must be not empty');
+
+        $this->makeValidator()->validateNotEmpty('', 'field');
+    }
+
+    public function testValidateNotEmptyWithZeroThrowsException(): void
+    {
+        $this->expectException(ComelusException::class);
+        $this->expectExceptionMessage('field must be not empty');
+
+        $this->makeValidator()->validateNotEmpty('0', 'field');
+    }
+
+    public function testValidateStrictlyPositiveIntWithOnePasses(): void
+    {
+        $this->expectNotToPerformAssertions();
+
+        $this->makeValidator()->validateStrictlyPositiveInt(1, 'rank');
+    }
+
+    public function testValidateStrictlyPositiveIntWithZeroThrowsException(): void
+    {
+        $this->expectException(ComelusException::class);
+        $this->expectExceptionMessage('rank must be greater than 0');
+
+        $this->makeValidator()->validateStrictlyPositiveInt(0, 'rank');
+    }
 }

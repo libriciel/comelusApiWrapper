@@ -7,8 +7,10 @@ namespace Libriciel\ComelusApiWrapper\Test\Model;
 use Libriciel\ComelusApiWrapper\ComelusException;
 use Libriciel\ComelusApiWrapper\Model\Annexe;
 use Libriciel\ComelusApiWrapper\Model\File;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use TypeError;
 
 final class FileTest extends TestCase
 {
@@ -64,74 +66,6 @@ final class FileTest extends TestCase
         $this->assertCount(0, $file->getAnnexes());  // Aucune annexe associée
     }
 
-    public function testCreateValidFileWithNameEmptyWithoutAnnexe(): void
-    {
-        $uploadedFile = new UploadedFile(
-            __DIR__ . '/../resources/test.pdf',
-            'test.pdf'
-        );
-
-        // Création d'un fichier sans annexe
-        $file = new File('Facture', '', 1, $uploadedFile, []);
-
-        $this->assertSame('Facture', $file->getCategory());
-        $this->assertSame('', $file->getName());
-        $this->assertSame(1, $file->getRank());
-        $this->assertInstanceOf(UploadedFile::class, $file->getUploadedFile());
-        $this->assertCount(0, $file->getAnnexes());  // Aucune annexe associée
-    }
-
-    public function testCreateValidFileWithNameNullWithoutAnnexe(): void
-    {
-        $uploadedFile = new UploadedFile(
-            __DIR__ . '/../resources/test.pdf',
-            'test.pdf'
-        );
-
-        // Création d'un fichier sans annexe
-        $file = new File('Facture', null, 1, $uploadedFile, []);
-
-        $this->assertSame('Facture', $file->getCategory());
-        $this->assertSame('', $file->getName());
-        $this->assertSame(1, $file->getRank());
-        $this->assertInstanceOf(UploadedFile::class, $file->getUploadedFile());
-        $this->assertCount(0, $file->getAnnexes());  // Aucune annexe associée
-    }
-
-    public function testCreateValidFileWithRankNullWithoutAnnexe(): void
-    {
-        $uploadedFile = new UploadedFile(
-            __DIR__ . '/../resources/test.pdf',
-            'test.pdf'
-        );
-
-        // Création d'un fichier sans annexe
-        $file = new File('Facture', 'facture.pdf', null, $uploadedFile, []);
-
-        $this->assertSame('Facture', $file->getCategory());
-        $this->assertSame('facture.pdf', $file->getName());
-        $this->assertNull($file->getRank());
-        $this->assertInstanceOf(UploadedFile::class, $file->getUploadedFile());
-        $this->assertCount(0, $file->getAnnexes());  // Aucune annexe associée
-    }
-
-    public function testCreateValidFileWithoutCategoryNameRankAnnexe(): void
-    {
-        $uploadedFile = new UploadedFile(
-            __DIR__ . '/../resources/test.pdf',
-            'test.pdf'
-        );
-
-        // Création d'un fichier sans annexe
-        $file = new File(null, null, null, $uploadedFile, []);
-
-        $this->assertSame('', $file->getCategory());
-        $this->assertSame('', $file->getName());
-        $this->assertNull($file->getRank());
-        $this->assertInstanceOf(UploadedFile::class, $file->getUploadedFile());
-        $this->assertCount(0, $file->getAnnexes());  // Aucune annexe associée
-    }
-
     // Test pour un fichier valide avec annexe
     public function testCreateValidFileWithAnnexe(): void
     {
@@ -150,66 +84,6 @@ final class FileTest extends TestCase
         $this->assertInstanceOf(UploadedFile::class, $file->getUploadedFile());
         $this->assertCount(1, $file->getAnnexes());  // Une annexe associée
         $this->assertSame('Annexe 1', $file->getAnnexes()[0]->getName());  // Vérification de l'annexe
-    }
-
-    public function testCreateValidFileWithNameAnnexeIsEmpty(): void
-    {
-        $uploadedFile = new UploadedFile(
-            __DIR__ . '/../resources/test.pdf',
-            'test.pdf'
-        );
-        $annexe = new Annexe('', 1, $uploadedFile);
-
-        // Création d'un fichier avec une annexe
-        $file = new File('Facture', 'facture.pdf', 1, $uploadedFile, [$annexe]);
-
-        $this->assertSame('Facture', $file->getCategory());
-        $this->assertSame('facture.pdf', $file->getName());
-        $this->assertSame(1, $file->getRank());
-        $this->assertInstanceOf(UploadedFile::class, $file->getUploadedFile());
-        $this->assertCount(1, $file->getAnnexes());  // Une annexe associée
-        $this->assertSame('', $file->getAnnexes()[0]->getName());  // Vérification de l'annexe
-        $this->assertSame(1, $file->getAnnexes()[0]->getRank());
-    }
-
-    public function testCreateValidFileWithNameAnnexeIsNull(): void
-    {
-        $uploadedFile = new UploadedFile(
-            __DIR__ . '/../resources/test.pdf',
-            'test.pdf'
-        );
-        $annexe = new Annexe(null, 1, $uploadedFile);
-
-        // Création d'un fichier avec une annexe
-        $file = new File('Facture', 'facture.pdf', 1, $uploadedFile, [$annexe]);
-
-        $this->assertSame('Facture', $file->getCategory());
-        $this->assertSame('facture.pdf', $file->getName());
-        $this->assertSame(1, $file->getRank());
-        $this->assertInstanceOf(UploadedFile::class, $file->getUploadedFile());
-        $this->assertCount(1, $file->getAnnexes());  // Une annexe associée
-        $this->assertSame('', $file->getAnnexes()[0]->getName());  // Vérification de l'annexe
-        $this->assertSame(1, $file->getAnnexes()[0]->getRank());
-    }
-
-    public function testCreateValidFileWithRankAnnexeIsNull(): void
-    {
-        $uploadedFile = new UploadedFile(
-            __DIR__ . '/../resources/test.pdf',
-            'test.pdf'
-        );
-        $annexe = new Annexe('Annexe 1', null, $uploadedFile);
-
-        // Création d'un fichier avec une annexe
-        $file = new File('Facture', 'facture.pdf', 1, $uploadedFile, [$annexe]);
-
-        $this->assertSame('Facture', $file->getCategory());
-        $this->assertSame('facture.pdf', $file->getName());
-        $this->assertSame(1, $file->getRank());
-        $this->assertInstanceOf(UploadedFile::class, $file->getUploadedFile());
-        $this->assertCount(1, $file->getAnnexes());  // Une annexe associée
-        $this->assertSame('Annexe 1', $file->getAnnexes()[0]->getName());  // Vérification de l'annexe
-        $this->assertNull($file->getAnnexes()[0]->getRank());
     }
 
     public function testCreateFileWithEmptyCategory(): void
@@ -248,52 +122,6 @@ final class FileTest extends TestCase
         $this->assertSame('test', $file->getName());
         $this->assertSame(1, $file->getRank());
         $this->assertInstanceOf(UploadedFile::class, $file->getUploadedFile());
-    }
-
-    public function testCreateFileWithEmptyName(): void
-    {
-        $file = new File(
-            'Facture',
-            '',
-            1,
-            new UploadedFile(
-                __DIR__ . '/../resources/test.pdf',
-                'test.pdf'
-            ),
-            []
-        );
-
-        $this->assertSame('Facture', $file->getCategory());
-        $this->assertSame('', $file->getName());
-        $this->assertSame(1, $file->getRank());
-        $this->assertInstanceOf(UploadedFile::class, $file->getUploadedFile());
-    }
-
-    public function testCreateFileWithNullName(): void
-    {
-        $file = new File(
-            'Facture',
-            null,
-            1,
-            new UploadedFile(
-                __DIR__ . '/../resources/test.pdf',
-                'test.pdf'
-            ),
-            []
-        );
-
-        $this->assertSame('Facture', $file->getCategory());
-        $this->assertSame('', $file->getName());
-        $this->assertSame(1, $file->getRank());
-        $this->assertInstanceOf(UploadedFile::class, $file->getUploadedFile());
-    }
-
-    public function testCreateFileWithBlankCategoryAndNameIsEmpty(): void
-    {
-        $file = new File('   ', "\t", 1, new UploadedFile(__DIR__ . '/../resources/test.pdf', 'test.pdf'));
-
-        $this->assertSame('', $file->getCategory());
-        $this->assertSame('', $file->getName());
     }
 
     public function testCreateFileWithNameTooLongThrowsException(): void
@@ -399,5 +227,62 @@ final class FileTest extends TestCase
         $this->assertCount(2, $file->getAnnexes());
         $this->assertSame('Annexe 1', $file->getAnnexes()[0]->getName());
         $this->assertSame('Annexe 2', $file->getAnnexes()[1]->getName());
+    }
+
+    public function testCreateFileWithBlankCategoryIsEmpty(): void
+    {
+        $file = new File('   ', 'facture.pdf', 1, $this->uploadedFile());
+
+        $this->assertSame('', $file->getCategory());
+    }
+
+    /**
+     * Comélus refuse `!$attachedFile['name']` (ApiV2Manager) : '' et '0' sont refusés.
+     */
+    #[DataProvider('emptyNameProvider')]
+    public function testCreateFileWithEmptyNameThrowsException(string $name): void
+    {
+        $this->expectException(ComelusException::class);
+        $this->expectExceptionMessage('file name must be not empty');
+        $this->expectExceptionCode(400);
+
+        new File('Facture', $name, 1, $this->uploadedFile());
+    }
+
+    /**
+     * @return iterable<string, array{string}>
+     */
+    public static function emptyNameProvider(): iterable
+    {
+        yield 'empty' => [''];
+        yield 'zero' => ['0'];
+    }
+
+    public function testCreateFileWithBlankNameIsKept(): void
+    {
+        $file = new File('Facture', '   ', 1, $this->uploadedFile());
+
+        $this->assertSame('   ', $file->getName());
+    }
+
+    public function testCreateFileWithNullNameThrowsTypeError(): void
+    {
+        $this->expectException(TypeError::class);
+
+        /** @phpstan-ignore argument.type */
+        new File('Facture', null, 1, $this->uploadedFile());
+    }
+
+    public function testCreateFileWithNullRankThrowsTypeError(): void
+    {
+        $this->expectException(TypeError::class);
+
+        /** @phpstan-ignore argument.type */
+        new File('Facture', 'facture.pdf', null, $this->uploadedFile());
+    }
+
+    private function uploadedFile(): UploadedFile
+    {
+        return new UploadedFile(__DIR__ . '/../resources/test.pdf', 'test.pdf');
     }
 }

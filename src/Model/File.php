@@ -11,30 +11,26 @@ class File
     use ValidatorTrait;
 
     private readonly string $category;
-    private readonly string $name;
 
+    /**
+     * @param ?string $category optional: null or blank is sent empty, the dossier then has no category
+     */
     public function __construct(
         ?string $category,
-        ?string $name,
-        private readonly ?int $rank,
+        private readonly string $name,
+        private readonly int $rank,
         private readonly UploadedFile $uploadedFile,
         private ?array $annexes = [],
     ) {
         $this->category = $this->normalizeOptionalString($category);
-        $this->name = $this->normalizeOptionalString($name);
 
         if ($this->category !== '') {
             $this->validateLength($this->category, 255, 'file category');
         }
 
-        if ($this->name !== '') {
-            $this->validateLength($this->name, 512, 'file name');
-        }
-
-        if ($this->rank !== null) {
-            $this->validatePositiveInt($this->rank, 'file rank');
-        }
-
+        $this->validateNotEmpty($this->name, 'file name');
+        $this->validateLength($this->name, 512, 'file name');
+        $this->validatePositiveInt($this->rank, 'file rank');
         $this->validateUploadedFile($this->uploadedFile, 'file uploadedFile');
 
         $this->annexes ??= [];
@@ -50,7 +46,7 @@ class File
         return $this->name;
     }
 
-    public function getRank(): ?int
+    public function getRank(): int
     {
         return $this->rank;
     }

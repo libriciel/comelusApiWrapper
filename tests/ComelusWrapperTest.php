@@ -472,108 +472,6 @@ final class ComelusWrapperTest extends TestCase
         $this->assertSame($expected, $content);
     }
 
-    public function testCreateDocumentMissingName()
-    {
-        $expected = [
-            'success' => true,
-            'id' => 'da781241-3c2c-420c-90f8-f2f83df99c74'
-        ];
-
-        $response = $this->createResponse(201, json_encode($expected));
-        $client = $this->stubClient($response);
-        $requestFactory = new Psr17Factory();
-        $streamFactory = new Psr17Factory();
-
-        $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
-        $comelusWrapper->setApiKey('myapiKey');
-        $comelusWrapper->setUrl('https://comelus.fr');
-
-        $uploadedFile = new UploadedFile(
-            __DIR__ . '/resources/test.pdf',
-            'test.pdf'
-        );
-        $file = new File('Facture', '', 1, $uploadedFile, []);
-        $dossier = new Dossier(
-            'myDocument',
-            'Nouveau document',
-            '44edebc7-3299-4da1-94b2-0202245d78db',
-            [
-                $file
-            ]
-        );
-
-        $content = $comelusWrapper->createDossier($dossier);
-        $this->assertSame($expected, $content);
-    }
-
-    public function testCreateDocumentMissingNameNull()
-    {
-        $expected = [
-            'success' => true,
-            'id' => 'da781241-3c2c-420c-90f8-f2f83df99c74'
-        ];
-
-        $response = $this->createResponse(201, json_encode($expected));
-        $client = $this->stubClient($response);
-        $requestFactory = new Psr17Factory();
-        $streamFactory = new Psr17Factory();
-
-        $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
-        $comelusWrapper->setApiKey('myapiKey');
-        $comelusWrapper->setUrl('https://comelus.fr');
-
-        $uploadedFile = new UploadedFile(
-            __DIR__ . '/resources/test.pdf',
-            'test.pdf'
-        );
-        $file = new File('Facture', null, 1, $uploadedFile, []);
-        $dossier = new Dossier(
-            'myDocument',
-            'Nouveau document',
-            '44edebc7-3299-4da1-94b2-0202245d78db',
-            [
-                $file
-            ]
-        );
-
-        $content = $comelusWrapper->createDossier($dossier);
-        $this->assertSame($expected, $content);
-    }
-
-    public function testCreateDocumentMissingRankNull()
-    {
-        $expected = [
-            'success' => true,
-            'id' => 'da781241-3c2c-420c-90f8-f2f83df99c74'
-        ];
-
-        $response = $this->createResponse(201, json_encode($expected));
-        $client = $this->stubClient($response);
-        $requestFactory = new Psr17Factory();
-        $streamFactory = new Psr17Factory();
-
-        $comelusWrapper = new ComelusWrapper($client, $requestFactory, $streamFactory);
-        $comelusWrapper->setApiKey('myapiKey');
-        $comelusWrapper->setUrl('https://comelus.fr');
-
-        $uploadedFile = new UploadedFile(
-            __DIR__ . '/resources/test.pdf',
-            'test.pdf'
-        );
-        $file = new File('Facture', 'test', null, $uploadedFile, []);
-        $dossier = new Dossier(
-            'myDocument',
-            'Nouveau document',
-            '44edebc7-3299-4da1-94b2-0202245d78db',
-            [
-                $file
-            ]
-        );
-
-        $content = $comelusWrapper->createDossier($dossier);
-        $this->assertSame($expected, $content);
-    }
-
     public function testCreateDocumentMissingDossierName()
     {
         $client = $this->createStub(ClientInterface::class);
@@ -897,35 +795,6 @@ final class ComelusWrapperTest extends TestCase
         $comelusWrapper->createDossier($this->createDossierWithOneFile());
     }
 
-    public function testCreateDossierWithoutOptionalFieldsSendsEmptyFields(): void
-    {
-        $uploadedFile = new UploadedFile(__DIR__ . '/resources/test.pdf', 'test.pdf');
-        $file = new File(null, null, null, $uploadedFile, []);
-        $file->addAnnexe(new Annexe(null, null, $uploadedFile));
-        $file->addAnnexe(new Annexe('', 2, $uploadedFile));
-        $dossier = new Dossier('myDocument', 'Nouveau document', '44edebc7-3299-4da1-94b2-0202245d78db', [$file]);
-
-        $response = $this->createResponse(201, '{"success":true,"id":"da781241-3c2c-420c-90f8-f2f83df99c74"}');
-        $comelusWrapper = $this->createWrapper($this->capturingClient($response));
-
-        $content = $comelusWrapper->createDossier($dossier);
-
-        $this->assertSame(['success' => true, 'id' => 'da781241-3c2c-420c-90f8-f2f83df99c74'], $content);
-        $this->assertNotNull($this->sentRequest);
-        $body = (string) $this->sentRequest->getBody();
-        foreach ([
-            'attachedFiles[0][category]' => '',
-            'attachedFiles[0][name]' => '',
-            'attachedFiles[0][rank]' => '',
-            'attachedFiles[0][annexes][0][name]' => '',
-            'attachedFiles[0][annexes][0][rank]' => '',
-            'attachedFiles[0][annexes][1][name]' => '',
-            'attachedFiles[0][annexes][1][rank]' => '2',
-        ] as $field => $value) {
-            $this->assertStringContainsString("name=\"{$field}\"\r\n\r\n{$value}\r\n", $body);
-        }
-    }
-
     public function testCreateDossierWithFileDeletedBeforeSendingThrowsComelusException(): void
     {
         $path = $this->copyTestPdf();
@@ -968,5 +837,30 @@ final class ComelusWrapperTest extends TestCase
         copy(__DIR__ . '/resources/test.pdf', $path);
 
         return $path;
+    }
+
+    public function testCreateDossierWithoutCategorySendsEmptyCategory(): void
+    {
+        $uploadedFile = new UploadedFile(__DIR__ . '/resources/test.pdf', 'test.pdf');
+        $file = new File(null, 'Délibération', 0, $uploadedFile, []);
+        $file->addAnnexe(new Annexe('Annexe', 1, $uploadedFile));
+        $dossier = new Dossier('myDocument', 'Nouveau document', '44edebc7-3299-4da1-94b2-0202245d78db', [$file]);
+
+        $response = $this->createResponse(201, '{"success":true,"id":"da781241-3c2c-420c-90f8-f2f83df99c74"}');
+        $comelusWrapper = $this->createWrapper($this->capturingClient($response));
+
+        $comelusWrapper->createDossier($dossier);
+
+        $this->assertNotNull($this->sentRequest);
+        $body = (string) $this->sentRequest->getBody();
+        foreach ([
+            'attachedFiles[0][category]' => '',
+            'attachedFiles[0][name]' => 'Délibération',
+            'attachedFiles[0][rank]' => '0',
+            'attachedFiles[0][annexes][0][name]' => 'Annexe',
+            'attachedFiles[0][annexes][0][rank]' => '1',
+        ] as $field => $value) {
+            $this->assertStringContainsString("name=\"{$field}\"\r\n\r\n{$value}\r\n", $body);
+        }
     }
 }

@@ -10,23 +10,14 @@ class Annexe
 {
     use ValidatorTrait;
 
-    private readonly string $name;
-
     public function __construct(
-        ?string $name,
-        private readonly ?int $rank,
+        private readonly string $name,
+        private readonly int $rank,
         private readonly UploadedFile $uploadedFile,
     ) {
-        $this->name = $this->normalizeOptionalString($name);
-
-        if ($this->name !== '') {
-            $this->validateLength($this->name, 512, 'annexe name');
-        }
-
-        if ($this->rank !== null) {
-            $this->validatePositiveInt($this->rank, 'annexe rank');
-        }
-
+        $this->validateNotEmpty($this->name, 'annexe name');
+        $this->validateLength($this->name, 512, 'annexe name');
+        $this->validateStrictlyPositiveInt($this->rank, 'annexe rank');
         $this->validateUploadedFile($this->uploadedFile, 'annexe uploadedFile');
     }
 
@@ -35,7 +26,7 @@ class Annexe
         return $this->name;
     }
 
-    public function getRank(): ?int
+    public function getRank(): int
     {
         return $this->rank;
     }

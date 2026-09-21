@@ -4,9 +4,10 @@ All notable changes to this project will be documented in this file.
 ## [4.0.0] - 2026-XX-XX
 
 ### Evolutions
-- Nom, catégorie et rang des fichiers (`File`) et nom et rang des annexes (`Annexe`) facultatifs : `null`, `""` ou un texte blanc sont envoyés à l'API comme champ vide ; `getName()` et `getCategory()` renvoient alors `""`
+- Catégorie des fichiers (`File`) facultative : `null`, `""` ou un texte blanc sont envoyés vides et Comélus crée le dossier sans catégorie ; `getCategory()` renvoie alors `""`
 
 ### Modifications
+- **Changement incompatible** : nom et rang des fichiers (`File`) et des annexes (`Annexe`) contrôlés comme le fait l'API v2 de Comélus, pour échouer avant l'envoi plutôt que sur un refus 400 : nom obligatoire (`""` et `"0"` refusés, « … name must be not empty »), rang d'annexe supérieur ou égal à 1 (« annexe rank must be greater than 0 ») ; le rang d'un fichier peut toujours valoir 0
 - **Changement incompatible** : `setUrl()` n'accepte plus que les URL en `https://` (message « malformed url : https required »), pour que la clé d'API ne transite jamais en clair ; vérifier avant la mise à jour qu'aucune URL Comélus enregistrée n'utilise `http://`
 
 ### Corrections

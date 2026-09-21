@@ -17,6 +17,16 @@ trait ValidatorTrait
     }
 
     /**
+     * Same rule as Comélus (`!$value`): '' and '0' are refused, a blank value is accepted.
+     */
+    public function validateNotEmpty(string $value, string $fieldName): void
+    {
+        if ($value === '' || $value === '0') {
+            throw new ComelusException("$fieldName must be not empty", 400);
+        }
+    }
+
+    /**
      * Optional text field: null or blank means "not provided" and is sent to the API as an empty field.
      */
     public function normalizeOptionalString(?string $value): string
@@ -38,6 +48,13 @@ trait ValidatorTrait
     {
         if ($value < 0) {
             throw new ComelusException("$fieldName must be a positive integer", 400);
+        }
+    }
+
+    public function validateStrictlyPositiveInt(int $value, string $fieldName): void
+    {
+        if ($value < 1) {
+            throw new ComelusException("$fieldName must be greater than 0", 400);
         }
     }
 
