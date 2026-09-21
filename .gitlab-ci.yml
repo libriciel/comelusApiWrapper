@@ -1,40 +1,112 @@
 include:
-  - template: Code-Quality.gitlab-ci.yml
   - template: Jobs/SAST.gitlab-ci.yml
   - template: Jobs/Secret-Detection.gitlab-ci.yml
-  - template: Security/Dependency-Scanning.gitlab-ci.yml
+  - template: Jobs/Dependency-Scanning.gitlab-ci.yml
+  - component: $LIBRICIEL_CATALOG_PATH/project-standards/check-libriciel-standards@3.0.0
+
+workflow:
+  rules:
+    - if: $CI_COMMIT_TAG
+    - if: $CI_COMMIT_BRANCH
 
 stages:
   - build
   - test
   - quality
-  - deploy
-  - staging
+
+.php-matrix:
+  parallel:
+    matrix:
+      - PHP_VERSION: ["8.3", "8.4", "8.5"]
+
+build:
+  stage: build
+  extends: .php-matrix
+  tags:
+    - citoyen-shell
+  script:
+    - IMAGE="${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_SLUG}-php${PHP_VERSION}"
+    - echo "$CI_JOB_TOKEN" | docker login -u gitlab-ci-token --password-stdin "$CI_REGISTRY"
+    - docker pull "$IMAGE" || true
+    - docker build --build-arg PHP_VERSION="$PHP_VERSION" --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from "$IMAGE" --tag "$IMAGE" .
+    - docker push "$IMAGE"
 
 unit_test:
   stage: test
-  image: hubdocker.libriciel.fr/php:8.3
+  extends: .php-matrix
   tags:
     - runner-citoyen
-  before_script:
-    - apt-get -y update && apt-get -y install git zip zlib1g-dev libzip-dev
-    - docker-php-ext-install zip
-    - pecl install xdebug && docker-php-ext-enable xdebug
-    - php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
-    - php composer-setup.php --install-dir=/usr/local/bin
-    - mv /usr/local/bin/composer.phar /usr/local/bin/composer
+  image: "${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_SLUG}-php${PHP_VERSION}"
   variables:
-    XDEBUG_MODE: coverage
+    GIT_STRATEGY: none
   script:
-    - composer install
+    - cd /app
     - vendor/bin/phpunit --coverage-text --colors=never --coverage-clover coverage/coverage.xml --log-junit coverage/logfile.xml
-  coverage: '/^\s*Lines:\s*\d+.\d+\%/'
+    # Les artefacts ne sont collectés que sous $CI_PROJECT_DIR : on y recopie les rapports.
+    - cp -rf coverage "$CI_PROJECT_DIR"
+  coverage: '/^\s*Lines:\s*\d+\.\d+%/'
   artifacts:
     paths:
       - coverage
-    expire_in: 1h
+    reports:
+      junit: coverage/logfile.xml
+    expire_in: 1 day
 
-code_quality:
-  services:
+.static_analysis:
+  stage: test
   tags:
-    - cq-sans-dind
+    - runner-citoyen
+  image: "${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_SLUG}-php8.3"
+  variables:
+    GIT_STRATEGY: none
+  before_script:
+    - cd /app
+
+phpstan:
+  extends: .static_analysis
+  script:
+    - vendor/bin/phpstan analyse --no-progress
+
+ecs:
+  extends: .static_analysis
+  script:
+    - vendor/bin/ecs
+
+composer:
+  extends: .static_analysis
+  script:
+    - composer validate --strict
+    - composer audit
+
+sonarqube:
+  stage: quality
+  tags:
+    - runner-citoyen
+  image:
+    name: hubdocker.libriciel.fr/sonarsource/sonar-scanner-cli:latest@sha256:23ca0f137965d9dff2198074043fd48d386280bc5d0ccac8c8349cea4cf096a9
+    entrypoint: [""]
+  needs:
+    - job: unit_test
+      parallel:
+        matrix:
+          - PHP_VERSION: "8.3"
+      artifacts: true
+  variables:
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
+    GIT_DEPTH: "0"
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - .sonar/cache
+  script:
+    # Les tests tournent dans l'image, où le code est dans /app : on ramène les chemins des rapports au dépôt analysé.
+    - sed -i "s#/app/#${CI_PROJECT_DIR}/#g" coverage/coverage.xml coverage/logfile.xml
+    # La version pilote la période « nouveau code » de Sonar : on la lit dans le premier titre du CHANGELOG.
+    - VERSION=$(grep -m1 -oE '^## \[[0-9]+\.[0-9]+\.[0-9]+\]' CHANGELOG.md | tr -d '#[] ')
+    - sonar-scanner -Dsonar.projectVersion="$VERSION"
+  allow_failure: true
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_BRANCH
+      when: manual
+      allow_failure: true
