@@ -14,6 +14,7 @@ use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Response;
 
 class ComelusWrapper
@@ -146,31 +147,39 @@ class ComelusWrapper
             $builder->addResource("attachedFiles[{$key}][category]", $file->getCategory());
             $builder->addResource("attachedFiles[{$key}][name]", $file->getName());
             $builder->addResource("attachedFiles[{$key}][rank]", strval($file->getRank()));
-            $builder->addResource(
-                "attachedFiles[{$key}][uploadedfile]",
-                fopen($file->getUploadedFile()->getPathname(), 'r'),
-                [
-                    'filename' => $file->getUploadedFile()->getClientOriginalName(),
-                    'headers' => ['Content-Type' => $file->getUploadedFile()->getMimeType()]
-                ]
-            );
+            $this->addFile($builder, "attachedFiles[{$key}][uploadedfile]", $file->getUploadedFile());
 
             /** @var Annexe $annexe */
             foreach ($file->getAnnexes() as $keyAnnexe => $annexe) {
                 $builder->addResource("attachedFiles[{$key}][annexes][{$keyAnnexe}][name]", $annexe->getName());
                 $builder->addResource("attachedFiles[{$key}][annexes][{$keyAnnexe}][rank]", strval($annexe->getRank()));
-                $builder->addResource(
+                $this->addFile(
+                    $builder,
                     "attachedFiles[{$key}][annexes][{$keyAnnexe}][uploadedfile]",
-                    fopen($annexe->getUploadedFile()->getPathname(), 'r'),
-                    [
-                        'filename' => $annexe->getUploadedFile()->getClientOriginalName(),
-                        'headers' => ['Content-Type' => $annexe->getUploadedFile()->getMimeType()]
-                    ]
+                    $annexe->getUploadedFile()
                 );
             }
         }
 
         return $builder;
+    }
+
+    /**
+     * The file is checked when the File/Annexe is built, but it may have been deleted since.
+     *
+     * @throws ComelusException
+     */
+    private function addFile(MultipartStreamBuilder $builder, string $fieldName, UploadedFile $uploadedFile): void
+    {
+        $resource = is_readable($uploadedFile->getPathname()) ? fopen($uploadedFile->getPathname(), 'r') : false;
+        if ($resource === false) {
+            throw new ComelusException("$fieldName file not readable", Response::HTTP_BAD_REQUEST);
+        }
+
+        $builder->addResource($fieldName, $resource, [
+            'filename' => $uploadedFile->getClientOriginalName(),
+            'headers' => ['Content-Type' => $uploadedFile->getMimeType()],
+        ]);
     }
 
     /**

@@ -925,4 +925,48 @@ final class ComelusWrapperTest extends TestCase
             $this->assertStringContainsString("name=\"{$field}\"\r\n\r\n{$value}\r\n", $body);
         }
     }
+
+    public function testCreateDossierWithFileDeletedBeforeSendingThrowsComelusException(): void
+    {
+        $path = $this->copyTestPdf();
+        $dossier = new Dossier(
+            'myDocument',
+            'Nouveau document',
+            '44edebc7-3299-4da1-94b2-0202245d78db',
+            [new File('Projets', 'Délibération', 1, new UploadedFile($path, 'test.pdf'), [])]
+        );
+        unlink($path);
+        $comelusWrapper = $this->createWrapper($this->stubClient($this->createResponse(201, '{"success":true}')));
+
+        $this->expectException(ComelusException::class);
+        $this->expectExceptionMessage('attachedFiles[0][uploadedfile] file not readable');
+        $this->expectExceptionCode(400);
+
+        $comelusWrapper->createDossier($dossier);
+    }
+
+    public function testCreateDossierWithAnnexeDeletedBeforeSendingThrowsComelusException(): void
+    {
+        $path = $this->copyTestPdf();
+        $file = new File('Projets', 'Délibération', 1, new UploadedFile(__DIR__ . '/resources/test.pdf', 'test.pdf'), []);
+        $file->addAnnexe(new Annexe('Annexe', 1, new UploadedFile($path, 'annexe.pdf')));
+        $dossier = new Dossier('myDocument', 'Nouveau document', '44edebc7-3299-4da1-94b2-0202245d78db', [$file]);
+        unlink($path);
+        $comelusWrapper = $this->createWrapper($this->stubClient($this->createResponse(201, '{"success":true}')));
+
+        $this->expectException(ComelusException::class);
+        $this->expectExceptionMessage('attachedFiles[0][annexes][0][uploadedfile] file not readable');
+        $this->expectExceptionCode(400);
+
+        $comelusWrapper->createDossier($dossier);
+    }
+
+    private function copyTestPdf(): string
+    {
+        $path = tempnam(sys_get_temp_dir(), 'comelus');
+        $this->assertNotFalse($path);
+        copy(__DIR__ . '/resources/test.pdf', $path);
+
+        return $path;
+    }
 }
