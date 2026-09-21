@@ -6,7 +6,7 @@ namespace Libriciel\ComelusApiWrapper\Model;
 
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
-class File
+final class File
 {
     use ValidatorTrait;
 

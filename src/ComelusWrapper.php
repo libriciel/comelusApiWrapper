@@ -17,6 +17,9 @@ use Psr\Http\Message\StreamFactoryInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * Not final: consumers replace it with a test double (idelibre: getMockBuilder(ComelusWrapper::class)).
+ */
 class ComelusWrapper
 {
     private const string BASE_ROUTE_PATH = '/api/v2';

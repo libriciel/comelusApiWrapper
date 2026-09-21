@@ -6,7 +6,7 @@ namespace Libriciel\ComelusApiWrapper\Model;
 
 use Libriciel\ComelusApiWrapper\ComelusException;
 
-class Dossier
+final class Dossier
 {
     use ValidatorDossierTrait;
     use ValidatorTrait;
